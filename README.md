@@ -1,14 +1,11 @@
-# Writing On GitHub #
+# Embedded Artistry: Writing On GitHub #
 
-[![Build Status](https://travis-ci.com/litefeel/writing-on-github.svg?branch=master)](https://travis-ci.com/litefeel/writing-on-github)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/litefeel/writing-on-github/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/litefeel/writing-on-github/?branch=master)
+TODO: Update litefeel refeernces to embedded artistry
+    - lib/client/fetch.php
+    - test data
+    - change log
+    - Readme
 
-**Contributors:** litefeel  
-**Tags:** github, git, version control, content, collaboration, publishing, writing  
-**Donate link:** https://www.paypal.me/litefeel  
-**Requires at least:** 3.9  
-**Tested up to:** 5.4  
-**Stable tag:** 1.11  
 **License:** GPLv2  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -28,6 +25,8 @@ Well, now you can! Introducing [Writing On GitHub](https://github.com/litefeel/w
 
 1.  Allows content publishers to version their content in GitHub
 2.  Allows readers to submit proposed improvements to WordPress-served content via GitHub's Pull Request model
+
+Note that it does not, however, allow for deleting posts on the front-end by removing the file in the repository. This prevents production websites from being taken down by a thoughtless commit.
 
 ### Writing On GitHub might be able to do some other cool things: ###
 
@@ -74,6 +73,28 @@ The sync action is based on two hooks:
 2. Configure your GitHub host, repository, secret (defined in the next step),  and OAuth Token on the Writing On GitHub settings page within WordPress's administrative interface. Make sure the repository has an initial commit or the export will fail.
 3. Create a WebHook within your repository with the provided callback URL and callback secret, using `application/json` as the content type. To set up a webhook on GitHub, head over to the **Settings** page of your repository, and click on **Webhooks & services**. After that, click on **Add webhook**.
 4. Click `Export to GitHub`
+
+## Building the Plugin for Release
+
+You cannot clone this repository directly to the server - it needs to be prepared for release with composer, or you need to run the command below inside the git repository on the server. 
+
+Run this command from the plugin root:
+
+```
+$ composer install
+```
+
+Settings and dependencies are defined in [`composer.json`](composer.json).
+
+## Debugging
+
+```
+$ wp wogh export all 0 --debug
+```
+
+## Running Tests
+
+TODO
 
 ## Frequently Asked Questions ##
 

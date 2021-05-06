@@ -80,10 +80,9 @@ class Writing_On_GitHub_Import {
             if ( $this->importable_raw_file( $blob ) ) {
                 $result = $this->import_raw_file( $blob, $is_remove );
             } elseif ( $this->importable_post( $blob ) ) {
-                if ( $is_remove ) {
-                    $result = $this->delete_post( $blob );
-                } else {
-                    $result = $this->import_post( $blob, $force );
+                // To prevent production errors, we don't remove posts via GitHub file deletion.
+                if ( ! $is_remove ) {
+                   $result = $this->import_post( $blob, $force );
                 }
             }
 
@@ -106,9 +105,11 @@ class Writing_On_GitHub_Import {
         $result = $this->app->api()->fetch()->tree_recursive();
 
         if ( is_wp_error( $result ) ) {
+            WP_CLI::debug('Error detected on tree_recursive!');
             /* @var WP_Error $result */
             return $result;
         }
+
 
         if ( is_array( $result ) ) {
             $result = $this->import_files( $result, $force );
@@ -132,9 +133,7 @@ class Writing_On_GitHub_Import {
     protected function importable_file( Writing_On_GitHub_File_Info $file ) {
 
         $path = $file->path;
-
-        // only _pages, _posts and images
-        $prefixs = array( '_pages/', '_posts/', '_drafts/', 'images/');
+        $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/');
         foreach ($prefixs as $prefix) {
             if ( ! strncasecmp($path, $prefix, strlen( $prefix ) ) ) {
                 return true;
@@ -167,31 +166,6 @@ class Writing_On_GitHub_Import {
             return false;
         }
 
-        return true;
-    }
-
-    /**
-     * Delete post
-     * @param  Writing_On_GitHub_Blob $blob
-     * @return WP_Error|bool
-     */
-    protected function delete_post( Writing_On_GitHub_Blob $blob ) {
-        $id = false;
-        $meta = $blob->meta();
-        if ( ! empty( $meta ) ) {
-            if ( array_key_exists( 'ID', $meta ) ) {
-                $id = $meta['ID'];
-            }
-        }
-        
-        if ( empty( $id ) ) {
-            return false;
-        }
-        $result = $this->app->database()->delete_post( $id );
-        if ( is_wp_error( $result ) ) {
-            /* @var WP_Error $result */
-            return $result;
-        }
         return true;
     }
 
@@ -238,11 +212,6 @@ class Writing_On_GitHub_Import {
      */
     protected function importable_raw_file( Writing_On_GitHub_Blob $blob ) {
         if ( $blob->has_frontmatter() ) {
-            return false;
-        }
-
-        // only images
-        if ( strncasecmp($blob->path(), 'images/', strlen('images/') ) != 0) {
             return false;
         }
 

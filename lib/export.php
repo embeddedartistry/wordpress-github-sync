@@ -95,7 +95,6 @@ class Writing_On_GitHub_Export {
         }
 
         if ( $old_github_path = $this->github_path( $post->id() ) ) {
-            error_log("old_github_path: $old_github_path");
             $post->set_old_github_path($old_github_path);
         }
 
@@ -157,10 +156,9 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_move_post',
                 sprintf(
-                    'Move %s to %s via WordPress at %s (%s)',
+                    'Move %s to %s via %s (two part commit)',
                     $old_github_path, $github_path,
                     site_url(),
-                    get_bloginfo( 'name' )
                 )
             ) . $this->get_commit_msg_tag();
 
@@ -178,10 +176,9 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_new_post',
                 sprintf(
-                    'Create new post %s from WordPress at %s (%s)',
+                    'Create %s from %s',
                     $github_path,
                     site_url(),
-                    get_bloginfo( 'name' )
                 )
             ) . $this->get_commit_msg_tag();
             $result = $persist->create_file( $blob, $message );
@@ -198,10 +195,9 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_update_post',
                 sprintf(
-                    'Update post %s from WordPress at %s (%s)',
+                    'Update %s from %s',
                     $github_path,
-                    site_url(),
-                    get_bloginfo( 'name' )
+                    site_url()
                 )
             ) . $this->get_commit_msg_tag();
             $result = $persist->update_file( $blob, $message );
@@ -237,10 +233,9 @@ class Writing_On_GitHub_Export {
         $message = apply_filters(
             'wogh_commit_msg_delete',
             sprintf(
-                'Deleting %s via WordPress at %s (%s)',
+                'Deleting %s via %s',
                 $github_path,
                 site_url(),
-                get_bloginfo( 'name' )
             ),
             $post
         ) . $this->get_commit_msg_tag();
@@ -253,18 +248,6 @@ class Writing_On_GitHub_Export {
         }
 
         return __( 'Export to GitHub completed successfully.', 'writing-on-github' );
-    }
-
-
-    /**
-     * Saves the export user to the database.
-     *
-     * @param int $user_id User ID to export with.
-     *
-     * @return bool
-     */
-    public function set_user( $user_id ) {
-        return update_option( self::EXPORT_USER_OPTION, (int) $user_id );
     }
 
     /**

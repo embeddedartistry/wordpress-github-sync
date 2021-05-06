@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Writing on GitHub
- * Plugin URI: https://github.com/litefeel/writing-on-github
+ * Plugin URI: https://github.com/embeddedartistry/writing-on-github
  * Description: A WordPress plugin to allow you writing on GitHub (or Jekyll site).
- * Version: 1.11
- * Author:  litefeel
- * Author URI: https://www.litefeel.com
+ * Version: 1.2
+ * Author:  Embedded Artistry
+ * Author URI: https://embeddedartistry.com
  * License: GPLv2
  * Text Domain: writing-on-github
  */
@@ -133,7 +133,10 @@ class Writing_On_GitHub {
         add_action( 'wp_ajax_nopriv_wogh_push_request', array( $this->controller, 'pull_posts' ) );
         add_action( 'wogh_export', array( $this->controller, 'export_all' ), 10, 2 );
         add_action( 'wogh_import', array( $this->controller, 'import_master' ), 10, 2 );
-        add_filter( 'get_edit_post_link', array( $this, 'edit_post_link' ), 10, 3 );
+        // Uncomment below to enable the "edit" button going to GitHub. I don't want it right now.
+        // The reason being the Wordpress view gives me the control I need for things like
+        // field atlas, courses, tooltips, etc.
+        //add_filter( 'get_edit_post_link', array( $this, 'edit_post_link' ), 10, 3 );
 
         // add_filter( 'wogh_post_meta', array( $this, 'ignore_post_meta' ), 10, 1 );
         // add_filter( 'wogh_pre_import_meta', array( $this, 'ignore_post_meta' ), 10, 1 );

@@ -134,10 +134,6 @@ class Writing_On_GitHub_Post {
             $this->post_content();
 
         return $this->front_matter() . $content;
-        // $content = $this->front_matter() . $content;
-        // $ending  = apply_filters( 'wogh_line_endings', "\n" );
-
-        // return preg_replace( '~(*BSR_ANYCRLF)\R~', $ending, $content );
     }
 
     /**
@@ -185,6 +181,7 @@ class Writing_On_GitHub_Post {
      */
     public function github_path() {
         $path = $this->github_directory() . $this->github_filename();
+        //error_log(sprintf(__('github directory: %s, github_filename: %s'), $this->github_directory(), $this->github_filename()));
 
         return $path;
     }
@@ -195,19 +192,54 @@ class Writing_On_GitHub_Post {
      * @return string
      */
     public function github_directory() {
-        if ( 'publish' !== $this->status() ) {
-            return apply_filters( 'wogh_directory_unpublished', '_drafts/', $this );
-        }
 
         $name = '';
 
         switch ( $this->type() ) {
             case 'post':
-                $name = 'posts';
+                $name = 'posts/' . get_the_time( 'Y', $this->id );
                 break;
             case 'page':
                 $name = 'pages';
                 break;
+            case 'glossary':
+                $name = 'glossary';
+                break;
+            case 'fieldatlas':
+            	$name = 'fieldatlas';
+            	break;
+            case 'newsletters':
+                $name = 'newsletters/' . get_the_time( 'Y', $this->id );
+            	break;
+            case 'course':
+            	// Course .md files are placed into the a subdirectory directory
+            	// corresponding to the course name. Lessons/modules will also go here.
+            	// We use get_the_title because get_name() can return different
+            	// values than what is used for the lesson in some cases (e.g.,
+            	// course was renamed), which causes two directories to appear
+            	// for each course
+            	$name = 'courses/' . sanitize_title(get_the_title($this->id));
+            	break;
+            case 'lesson':
+				// Lessons need to be organized under courses/course_name/module_name/
+                $course_id = Sensei()->lesson->get_course_id($this->id);
+                $course_name = get_the_title($course_id);
+				$name = 'courses/' . sanitize_title($course_name);
+				$module = Sensei()->modules->get_lesson_module($this->id);
+				if($module)
+                {
+                    // We want to remove author names from module names
+                    // because Sensei is putting those in place for admin users
+                    // which causes problems when importing or exporting post changes
+                    $exploded_module_name = explode('(', $module->name);
+                    $name = $name . '/' . sanitize_title($exploded_module_name[0]);
+                }
+                else
+				{
+                    error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
+				}
+
+				break;
             default:
                 $obj = get_post_type_object( $this->type() );
 
@@ -221,21 +253,17 @@ class Writing_On_GitHub_Post {
         }
 
         if ( $name ) {
-            $name = '_' . $name . '/';
+            $name = $name . '/';
         }
 
         return apply_filters( 'wogh_directory_published', $name, $this );
     }
 
     /**
-     * Build GitHub filename based on post
+     * Build GitHub filename
      */
     public function github_filename() {
-        if ( 'post' === $this->type() ) {
-            $filename = get_the_time( 'Y/', $this->id ) . $this->get_name() . '.md';
-        } else {
-            $filename = $this->get_name() . '.md';
-        }
+        $filename = $this->get_name() . '.md';
 
         return apply_filters( 'wogh_filename', $filename, $this );
     }
@@ -290,20 +318,6 @@ class Writing_On_GitHub_Post {
         $branch = $this->api->fetch()->branch();
 
         return "https://github.com/$repository/edit/$branch/$github_path";
-    }
-
-    /**
-     * Retrieve post type directory from blob path.
-     *
-     * @param string $path Path string.
-     *
-     * @return string
-     */
-    public function get_directory_from_path( $path ) {
-        $directory = explode( '/', $path );
-        $directory = count( $directory ) > 0 ? $directory[0] : '';
-
-        return $directory;
     }
 
     /**

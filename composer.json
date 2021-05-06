@@ -1,13 +1,13 @@
 {
-  "name": "litefeel/writing-on-github",
-  "description": "A WordPress plugin to allow you writing on GitHub (or Jekyll site).",
+  "name": "embeddedartistry/writing-on-github",
+  "description": "A WordPress plugin to support synchronization between Embedded Artistry Wordpress and GitHub.",
   "type": "wordpress-plugin",
   "minimum-stability": "stable",
   "license": "GPL",
   "authors": [
     {
-      "name": "litefeel",
-      "email": "litefeel@gmail.com"
+      "name": "embeddedartistry",
+      "email": "contact@embeddedartistry.com"
     }
   ],
   "autoload": {

@@ -21,7 +21,15 @@ class Writing_On_GitHub_Database {
      *
      * @var array
      */
-    protected $whitelisted_post_types = array( 'post', 'page' );
+    protected $whitelisted_post_types = array(
+        'post',
+        'page',
+        'glossary',
+        'newsletters',
+        'course',
+        'lesson',
+        'fieldatlas'
+    );
 
     /**
      * Currently whitelisted post statuses.
@@ -94,10 +102,11 @@ class Writing_On_GitHub_Database {
                 'unsupported_post',
                 sprintf(
                     __(
-                        'Post ID %s is not supported by WOGH. See wiki to find out how to add support.',
+                        'Post ID %s (name %s) is not supported at this time.',
                         'writing-on-github'
                     ),
-                    $post_id
+                    $post_id,
+                    get_the_title($post_id)
                 )
             );
         }
@@ -115,26 +124,18 @@ class Writing_On_GitHub_Database {
     public function save_post( Writing_On_GitHub_Post $post ) {
         $args = apply_filters( 'wogh_pre_import_args', $this->post_args( $post ), $post );
 
+        if ( $post->is_new() ) {
+            error_log('This plugin does not support adding posts from GitHub. Please initially create content with the Wordpress front-end.');
+            return false;
+        }
+
         remove_filter( 'content_save_pre', 'wp_filter_post_kses' );
-        $post_id = $post->is_new() ?
-            wp_insert_post( $args, true ) :
-            wp_update_post( $args, true );
+        $post_id = wp_update_post( $args, true );
         add_filter( 'content_save_pre', 'wp_filter_post_kses' );
 
         if ( is_wp_error( $post_id ) ) {
             /* @var WP_Error $post_id */
             return $post_id;
-        }
-
-        if ( $post->is_new() ) {
-            $author = false;
-            $meta = $post->get_meta();
-            if ( ! empty( $meta ) && ! empty( $meta['author'] ) ) {
-                $author = $meta['author'];
-            }
-            $user    = $this->fetch_commit_user( $author );
-            $user_id = is_wp_error( $user ) ? 0 : $user->ID;
-            $this->set_post_author( $post_id, $user_id );
         }
 
         $post->set_post( get_post( $post_id ) );
@@ -227,100 +228,6 @@ class Writing_On_GitHub_Database {
     }
 
     /**
-     * Deletes a post from the database based on its GitHub path.
-     *
-     * @param string $path Path of Post to delete.
-     *
-     * @return string|WP_Error
-     */
-    public function delete_post_by_path( $path ) {
-        $query = new WP_Query( array(
-            'meta_key'       => '_wogh_github_path',
-            'meta_value'     => $path,
-            'meta_compare'   => '=',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-        ) );
-
-        $post_id = $query->get_posts();
-        $post_id = array_pop( $post_id );
-
-        if ( ! $post_id ) {
-            $parts     = explode( '/', $path );
-            $filename  = array_pop( $parts );
-            $directory = $parts ? array_shift( $parts ) : '';
-
-            if ( false !== strpos( $directory, 'post' ) ) {
-                $post_id = get_post_id_by_filename( $filename, '/([0-9]{4})-([0-9]{2})-([0-9]{2})-(.*)\.md/' );
-            }
-
-            if ( ! $post_id ) {
-                $post_id = get_post_id_by_filename( $filename, '/(.*)\.md/' );
-            }
-        }
-
-        if ( ! $post_id ) {
-            return new WP_Error(
-                'path_not_found',
-                sprintf(
-                    __( 'Post not found for path %s.', 'writing-on-github' ),
-                    $path
-                )
-            );
-        }
-
-        $result = wp_delete_post( $post_id );
-
-        // If deleting fails...
-        if ( false === $result ) {
-            $post = get_post( $post_id );
-
-            // ...and the post both exists and isn't in the trash...
-            if ( $post && 'trash' !== $post->post_status ) {
-                // ... then something went wrong.
-                return new WP_Error(
-                    'db_error',
-                    sprintf(
-                        __( 'Failed to delete post ID %d.', 'writing-on-github' ),
-                        $post_id
-                    )
-                );
-            }
-        }
-
-        return sprintf(
-            __( 'Successfully deleted post ID %d.', 'writing-on-github' ),
-            $post_id
-        );
-    }
-
-    public function delete_post( $post_id ) {
-        $result = wp_delete_post( $post_id );
-
-        // If deleting fails...
-        if ( false === $result ) {
-            $post = get_post( $post_id );
-
-            // ...and the post both exists and isn't in the trash...
-            if ( $post && 'trash' !== $post->post_status ) {
-                // ... then something went wrong.
-                return new WP_Error(
-                    'db_error',
-                    sprintf(
-                        __( 'Failed to delete post ID %d.', 'writing-on-github' ),
-                        $post_id
-                    )
-                );
-            }
-        }
-
-        return sprintf(
-            __( 'Successfully deleted post ID %d.', 'writing-on-github' ),
-            $post_id
-        );
-    }
-
-    /**
      * Returns the list of post type permitted.
      *
      * @return array
@@ -363,19 +270,23 @@ class Writing_On_GitHub_Database {
      */
     protected function is_post_supported( Writing_On_GitHub_Post $post ) {
         if ( wp_is_post_revision( $post->id ) ) {
+            error_log(sprintf(__('Post ID %d is not post revision'), $post->id));
             return false;
         }
 
         // We need to allow trashed posts to be queried, but they are not whitelisted for export.
         if ( ! in_array( $post->status(), $this->get_whitelisted_post_statuses() ) && 'trash' !== $post->status() ) {
+            error_log(sprintf(__('Post ID %d has status %s, which is not whitelisted'), $post->id, $post->status()));
             return false;
         }
 
         if ( ! in_array( $post->type(), $this->get_whitelisted_post_types() ) ) {
+            error_log(sprintf(__('Post ID %d has type %s, which is not whitelisted'), $post->id, $post->type()));
             return false;
         }
 
         if ( $post->has_password() ) {
+            error_log(sprintf(__('Post ID %d has a password'), $post->id));
             return false;
         }
 
