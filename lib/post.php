@@ -191,6 +191,17 @@ class Writing_On_GitHub_Post {
 
     /**
      * Get GitHub directory based on post
+     * //TODO: course
+     * // TODO: module
+     * // TODO: lesson
+     * // TODO: newsletter
+     * // TODO: field-atlas
+     * // TODO: check glossary
+     *	Posts, newsletter: separated by year
+     * // TODO: course needs to be in the course subdir
+     * // TODO: modules need to be in couse/module
+     * // TODO: lessons need ot be in course/module
+     * // Field atlas + glossary + pages: alphabetical, no hierarchy
      *
      * @return string
      */
@@ -204,6 +215,7 @@ class Writing_On_GitHub_Post {
         switch ( $this->type() ) {
             case 'post':
                 $name = 'posts';
+                $name = $name . get_the_time( 'Y/', $this->id );
                 break;
             case 'page':
                 $name = 'pages';
@@ -211,6 +223,13 @@ class Writing_On_GitHub_Post {
             case 'glossary':
                 $name = 'glossary';
                 break;
+            case 'fieldatlas':
+            	$name = 'fieldatlas';
+            	break;
+            case 'newsletters':
+            	$name = 'newsletter';
+            	$name = $name . get_the_time( 'Y/', $this->id );
+            	break;
             default:
                 $obj = get_post_type_object( $this->type() );
 
@@ -231,21 +250,9 @@ class Writing_On_GitHub_Post {
     }
 
     /**
-     * Build GitHub filename based on post type
-     *	Posts, newsletter: separated by year
-     * // TODO: course needs to be in the course subdir
-     * // TODO: modules need to be in couse/module
-     * // TODO: lessons need ot be in course/module
-     * // Field atlas + glossary + pages: alphabetical, no hierarchy
+     * Build GitHub filename
      */
     public function github_filename() {
-    	$type = $this->type();
-
-    	// Some types of posts need a subdirectory prefix
-        if ( 'post' === $type || 'newsletter' === $type) {
-            $filename = get_the_time( 'Y/', $this->id );
-        }
-
         $filename = $filename . $this->get_name() . 'md';
 
         return apply_filters( 'wogh_filename', $filename, $this );
