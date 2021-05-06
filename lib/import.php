@@ -134,6 +134,8 @@ class Writing_On_GitHub_Import {
         $path = $file->path;
 
         // only _pages, _posts and images
+        // TODO: adjust to handle other types!
+        // TODO: drafts needs to be in a per-type?
         $prefixs = array( '_pages/', '_posts/', '_drafts/', 'images/');
         foreach ($prefixs as $prefix) {
             if ( ! strncasecmp($path, $prefix, strlen( $prefix ) ) ) {
@@ -183,7 +185,7 @@ class Writing_On_GitHub_Import {
                 $id = $meta['ID'];
             }
         }
-        
+
         if ( empty( $id ) ) {
             return false;
         }
