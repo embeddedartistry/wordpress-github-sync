@@ -206,6 +206,8 @@ class Writing_On_GitHub_Post {
      * @return string
      */
     public function github_directory() {
+    	/* TODO: drafts needs to be in a per-type? */
+    	// TODO: rename drafts
         if ( 'publish' !== $this->status() ) {
             return apply_filters( 'wogh_directory_unpublished', '_drafts/', $this );
         }
