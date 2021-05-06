@@ -208,6 +208,9 @@ class Writing_On_GitHub_Post {
             case 'page':
                 $name = 'pages';
                 break;
+            case 'glossary':
+                $name = 'glossary';
+                break;
             default:
                 $obj = get_post_type_object( $this->type() );
 
