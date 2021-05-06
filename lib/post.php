@@ -231,14 +231,22 @@ class Writing_On_GitHub_Post {
     }
 
     /**
-     * Build GitHub filename based on post
+     * Build GitHub filename based on post type
+     *	Posts, newsletter: separated by year
+     * // TODO: course needs to be in the course subdir
+     * // TODO: modules need to be in couse/module
+     * // TODO: lessons need ot be in course/module
+     * // Field atlas + glossary + pages: alphabetical, no hierarchy
      */
     public function github_filename() {
-        if ( 'post' === $this->type() ) {
-            $filename = get_the_time( 'Y/', $this->id ) . $this->get_name() . '.md';
-        } else {
-            $filename = $this->get_name() . '.md';
+    	$type = $this->type();
+
+    	// Some types of posts need a subdirectory prefix
+        if ( 'post' === $type || 'newsletter' === $type) {
+            $filename = get_the_time( 'Y/', $this->id );
         }
+
+        $filename = $filename . $this->get_name() . 'md';
 
         return apply_filters( 'wogh_filename', $filename, $this );
     }
