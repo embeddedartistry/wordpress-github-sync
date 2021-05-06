@@ -18,10 +18,12 @@ class Writing_On_GitHub_Database {
 
     /**
      * Currently whitelisted post types.
+     * // TODO: fieldatlas?
+     * // TODO: modules?
      *
      * @var array
      */
-    protected $whitelisted_post_types = array( 'post', 'page' );
+    protected $whitelisted_post_types = array( 'post', 'page', 'glossary', 'newsletters', 'course', 'lesson', 'fieldatlas');
 
     /**
      * Currently whitelisted post statuses.
