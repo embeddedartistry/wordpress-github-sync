@@ -224,7 +224,7 @@ class Writing_On_GitHub_Post {
         }
 
         if ( $name ) {
-            $name = '_' . $name . '/';
+            $name = $name . '/';
         }
 
         return apply_filters( 'wogh_directory_published', $name, $this );
