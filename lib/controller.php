@@ -63,6 +63,12 @@ class Writing_On_GitHub_Controller {
         }
         $payload = $this->app->request()->payload();
 
+        WP_CLI::debug(
+            sprintf(
+                __( 'IMPORT: YOU ARE HERE', 'writing-on-github' )
+            )
+        );
+
         $error = $payload->should_import();
         if ( is_wp_error( $error ) ) {
             /*　@var WP_Error $error */
