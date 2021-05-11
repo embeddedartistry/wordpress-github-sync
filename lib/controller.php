@@ -117,8 +117,8 @@ class Writing_On_GitHub_Controller {
 
          WP_CLI::debug(
             sprintf(
-                __( 'IMPORT: result: %d', 'writing-on-github' ),
-                $result
+                __( 'IMPORT: result: %s', 'writing-on-github' ),
+                $result->get_error_message()
             )
         );
 
