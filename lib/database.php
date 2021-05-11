@@ -23,7 +23,15 @@ class Writing_On_GitHub_Database {
      *
      * @var array
      */
-    protected $whitelisted_post_types = array( 'post', 'page', 'glossary', 'newsletters', 'course', 'lesson', 'fieldatlas');
+    protected $whitelisted_post_types = array(
+        'post',
+        'page',
+        'glossary',
+        'newsletters',
+        'course',
+        'lesson',
+        'fieldatlas'
+    );
 
     /**
      * Currently whitelisted post statuses.
