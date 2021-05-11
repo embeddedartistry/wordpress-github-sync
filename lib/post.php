@@ -224,7 +224,7 @@ class Writing_On_GitHub_Post {
             	$name = 'fieldatlas';
             	break;
             case 'newsletters':
-            	$name = 'newsletter';
+            	$name = 'newsletters';
             	$name = $name . get_the_time( 'Y/', $this->id );
             	break;
             default:
