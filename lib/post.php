@@ -211,7 +211,7 @@ class Writing_On_GitHub_Post {
 
         switch ( $this->type() ) {
             case 'post':
-                $name = 'posts/' . get_the_time( 'Y/', $this->id );
+                $name = 'posts/' . get_the_time( 'Y', $this->id );
                 break;
             case 'page':
                 $name = 'pages';
@@ -223,7 +223,7 @@ class Writing_On_GitHub_Post {
             	$name = 'fieldatlas';
             	break;
             case 'newsletters':
-                $name = 'newsletters/' . get_the_time( 'Y/', $this->id );
+                $name = 'newsletters/' . get_the_time( 'Y', $this->id );
             	break;
             case 'course':
             	// Course .md files are placed into the a subdirectory directory
