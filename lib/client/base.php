@@ -62,7 +62,7 @@ class Writing_On_GitHub_Base_Client {
         $status   = wp_remote_retrieve_header( $response, 'status' );
         $body     = json_decode( wp_remote_retrieve_body( $response ) );
 
-        WP_CLI::debug(sprintf(__("Response: %s"), $response));
+        WP_CLI::debug(vsprintf(("Response: %s %s %s"), $body));
 
         if ( '2' !== substr( $status, 0, 1 ) && '3' !== substr( $status, 0, 1 ) ) {
             WP_CLI::debug(sprintf(
