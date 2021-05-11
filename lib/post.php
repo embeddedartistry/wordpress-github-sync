@@ -230,6 +230,12 @@ class Writing_On_GitHub_Post {
             	// corresponding to the course name. Lessons/modules will also go here.
             	$name = 'courses/' . $this->get_name();
             	break;
+            case 'lesson':
+				// Lessons need to be organized under courses/course_name/module_name/
+				$course_name = get_the_title(get_course_id($this->id));
+				$module_name = get_the_title(get_lesson_module($this->id));
+				$name = 'courses/' . $course_name . '/' . $module_name . '/';
+				break;
             default:
                 $obj = get_post_type_object( $this->type() );
 
