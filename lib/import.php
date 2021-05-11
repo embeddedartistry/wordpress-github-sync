@@ -102,37 +102,15 @@ class Writing_On_GitHub_Import {
      * @return string|WP_Error
      */
     public function master( $force = false ) {
-
-         WP_CLI::debug(
-            sprintf(
-                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
-                1
-            )
-        );
-
         $result = $this->app->api()->fetch()->tree_recursive();
 
         if ( is_wp_error( $result ) ) {
-            WP_CLI::debug('Error detected on tree_recursive!');
             /* @var WP_Error $result */
             return $result;
         }
 
-        WP_CLI::debug(
-            sprintf(
-                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
-                2
-            )
-        );
 
         if ( is_array( $result ) ) {
-            WP_CLI::debug(
-                sprintf(
-                    __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
-                    3
-                )
-            );
-
             $result = $this->import_files( $result, $force );
         }
 

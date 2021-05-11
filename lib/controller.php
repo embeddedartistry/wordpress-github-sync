@@ -98,13 +98,6 @@ class Writing_On_GitHub_Controller {
             ) );
         }
 
-         WP_CLI::debug(
-            sprintf(
-                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
-                0
-            )
-        );
-
         $this->app->semaphore()->lock();
         remove_action( 'save_post', array( $this, 'export_post' ) );
 
@@ -113,14 +106,6 @@ class Writing_On_GitHub_Controller {
         }
 
         $result = $this->app->import()->master( $force );
-
-
-         WP_CLI::debug(
-            sprintf(
-                __( 'IMPORT: result: %s', 'writing-on-github' ),
-                $result->get_error_message()
-            )
-        );
 
         $this->app->semaphore()->unlock();
 
@@ -132,13 +117,6 @@ class Writing_On_GitHub_Controller {
         }
 
         update_option( '_wogh_import_complete', 'yes' );
-
-         WP_CLI::debug(
-            sprintf(
-                __( 'IMPORT: DONE %d', 'writing-on-github' ),
-                0
-            )
-        );
 
         return $this->app->response()->success( $result );
     }
