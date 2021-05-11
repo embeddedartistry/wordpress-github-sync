@@ -232,6 +232,20 @@ class Writing_On_GitHub_Post {
             	break;
             case 'lesson':
 				// Lessons need to be organized under courses/course_name/module_name/
+	            WP_CLI::debug(
+	                sprintf(
+	                    __( 'Course id for lesson %s: %d', 'writing-on-github' ),
+	                    $this->get_name(),
+	                    Sensei()->lesson->get_course_id($this->id)
+	                )
+	            );
+	            WP_CLI::debug(
+	                sprintf(
+	                    __( 'Module id for lesson %s: %d', 'writing-on-github' ),
+	                    $this->get_name(),
+	                    Sensei()->modules->get_lesson_module($this->id)
+	                )
+	            );
 				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
 				$module_name = get_the_title(Sensei()->modules->get_lesson_module($this->id));
 				$name = 'courses/' . $course_name . '/' . $module_name;
@@ -239,8 +253,8 @@ class Writing_On_GitHub_Post {
                 sprintf(
                     __( 'Lesson directory name: %d', 'writing-on-github' ),
                     $name
-                )
-            );
+	                )
+	            );
 				break;
             default:
                 $obj = get_post_type_object( $this->type() );
