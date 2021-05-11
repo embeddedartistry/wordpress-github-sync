@@ -40,6 +40,7 @@ class Writing_On_GitHub_Base_Client {
      * @return stdClass|WP_Error
      */
     protected function call( $method, $endpoint, $body = array() ) {
+        WP_CLI::debug('starting call');
         if ( is_wp_error( $error = $this->can_call() ) ) {
             WP_CLI::debug('error in can_call');
             /*　@var WP_Error $error */
