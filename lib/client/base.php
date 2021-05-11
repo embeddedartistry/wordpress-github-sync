@@ -58,12 +58,6 @@ class Writing_On_GitHub_Base_Client {
             $args['body'] = json_encode( $body );
         }
 
-         WP_CLI::debug(sprintf(
-                    __( 'endpoint %s, authorization %s', ),
-                    $endpoint,
-                    $args['headers']['Authorization']
-                ));
-
         $response = wp_remote_request( $endpoint, $args );
         $status   = wp_remote_retrieve_header( $response, 'status' );
         $body     = json_decode( wp_remote_retrieve_body( $response ) );
