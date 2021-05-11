@@ -232,8 +232,8 @@ class Writing_On_GitHub_Post {
             	break;
             case 'lesson':
 				// Lessons need to be organized under courses/course_name/module_name/
-				$course_name = get_the_title(get_course_id($this->id));
-				$module_name = get_the_title(get_lesson_module($this->id));
+				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
+				$module_name = get_the_title(Sensei()->modules->get_lesson_module($this->id));
 				$name = 'courses/' . $course_name . '/' . $module_name . '/';
 				break;
             default:
