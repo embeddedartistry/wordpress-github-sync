@@ -133,10 +133,9 @@ class Writing_On_GitHub_Import {
 
         $path = $file->path;
 
-        // only _pages, _posts and images
-        // TODO: adjust to handle other types!
+        // TODO: handle lessons within course hierarchy
         // TODO: drafts needs to be in a per-type?
-        $prefixs = array( '_pages/', '_posts/', '_drafts/', 'images/');
+        $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/', '_drafts/', 'images/');
         foreach ($prefixs as $prefix) {
             if ( ! strncasecmp($path, $prefix, strlen( $prefix ) ) ) {
                 return true;
