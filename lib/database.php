@@ -27,7 +27,7 @@ class Writing_On_GitHub_Database {
         //'post',
         //'page',
         //'glossary',
-        //'newsletters',
+        'newsletters',
         'course',
         //'lesson',
         //'fieldatlas'
