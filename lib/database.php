@@ -24,13 +24,13 @@ class Writing_On_GitHub_Database {
      * @var array
      */
     protected $whitelisted_post_types = array(
-        //'post',
-        //'page',
-        //'glossary',
+        'post',
+        'page',
+        'glossary',
         'newsletters',
         'course',
         'lesson',
-        //'fieldatlas'
+        'fieldatlas'
     );
 
     /**
