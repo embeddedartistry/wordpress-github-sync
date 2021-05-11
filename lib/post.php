@@ -255,7 +255,7 @@ class Writing_On_GitHub_Post {
      * Build GitHub filename
      */
     public function github_filename() {
-        $filename = $filename . $this->get_name() . 'md';
+        $filename = $this->get_name() . '.md';
 
         return apply_filters( 'wogh_filename', $filename, $this );
     }
