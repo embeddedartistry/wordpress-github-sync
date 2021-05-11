@@ -84,10 +84,9 @@ class Writing_On_GitHub_Import {
             if ( $this->importable_raw_file( $blob ) ) {
                 $result = $this->import_raw_file( $blob, $is_remove );
             } elseif ( $this->importable_post( $blob ) ) {
-                if ( $is_remove ) {
-                    $result = $this->delete_post( $blob );
-                } else {
-                    $result = $this->import_post( $blob, $force );
+                // To prevent production errors, we don't remove posts via GitHub file deletion.
+                if ( ! $is_remove ) {
+                   $result = $this->import_post( $blob, $force );
                 }
             }
 
@@ -176,31 +175,6 @@ class Writing_On_GitHub_Import {
     }
 
     /**
-     * Delete post
-     * @param  Writing_On_GitHub_Blob $blob
-     * @return WP_Error|bool
-     */
-    protected function delete_post( Writing_On_GitHub_Blob $blob ) {
-        $id = false;
-        $meta = $blob->meta();
-        if ( ! empty( $meta ) ) {
-            if ( array_key_exists( 'ID', $meta ) ) {
-                $id = $meta['ID'];
-            }
-        }
-
-        if ( empty( $id ) ) {
-            return false;
-        }
-        $result = $this->app->database()->delete_post( $id );
-        if ( is_wp_error( $result ) ) {
-            /* @var WP_Error $result */
-            return $result;
-        }
-        return true;
-    }
-
-    /**
      * Imports a post into wordpress
      * @param  Writing_On_GitHub_Blob $blob
      * @param  boolean                $force
@@ -259,6 +233,7 @@ class Writing_On_GitHub_Import {
      * @param  Writing_On_GitHub_Blob $blob
      * @param  bool                   $is_remove
      */
+    // TODO: does is_remove logic here need to change?
     protected function import_raw_file( Writing_On_GitHub_Blob $blob, $is_remove ) {
         $arr = wp_upload_dir();
         $path = $arr['basedir'] . '/writing-on-github/' . $blob->path();

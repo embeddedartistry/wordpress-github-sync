@@ -32,6 +32,8 @@ Well, now you can! Introducing [Writing On GitHub](https://github.com/litefeel/w
 1.  Allows content publishers to version their content in GitHub
 2.  Allows readers to submit proposed improvements to WordPress-served content via GitHub's Pull Request model
 
+Note that it does not, however, allow for deleting posts on the front-end by removing the file in the repository. This prevents production websites from being taken down by a thoughtless commit.
+
 ### Writing On GitHub might be able to do some other cool things: ###
 
 * Allow teams to collaboratively write and edit posts using GitHub (e.g., pull requests, issues, comments)
