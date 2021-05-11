@@ -234,16 +234,17 @@ class Writing_On_GitHub_Post {
 				// Lessons need to be organized under courses/course_name/module_name/
 	            WP_CLI::debug(
 	                sprintf(
-	                    __( 'Course id for lesson %s: %d', 'writing-on-github' ),
+	                    __( 'Course id for lesson %s: %d (%s)', 'writing-on-github' ),
 	                    $this->get_name(),
-	                    Sensei()->lesson->get_course_id($this->id)
+	                    Sensei()->lesson->get_course_id($this->id),
+	                    get_the_title(Sensei()->lesson->get_course_id($this->id))
 	                )
 	            );
 	            WP_CLI::debug(
 	                sprintf(
-	                    __( 'Module id for lesson %s: %d', 'writing-on-github' ),
+	                    __( 'Module id for lesson %s: %s', 'writing-on-github' ),
 	                    $this->get_name(),
-	                    Sensei()->modules->get_lesson_module($this->id)
+	                    get_the_title(Sensei()->modules->get_lesson_module($this->id)
 	                )
 	            );
 				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
