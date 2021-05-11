@@ -65,7 +65,8 @@ class Writing_On_GitHub_Controller {
 
         WP_CLI::debug(
             sprintf(
-                __( 'IMPORT: YOU ARE HERE', 'writing-on-github' )
+                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
+                0
             )
         );
 
