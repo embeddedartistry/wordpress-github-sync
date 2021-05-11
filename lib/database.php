@@ -242,6 +242,9 @@ class Writing_On_GitHub_Database {
      * @param string $path Path of Post to delete.
      *
      * @return string|WP_Error
+     *
+     * TODO:
+     * Likely need to udpate this function to make sure we can recreate the proper path
      */
     public function delete_post_by_path( $path ) {
         $query = new WP_Query( array(
