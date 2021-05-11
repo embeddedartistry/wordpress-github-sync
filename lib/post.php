@@ -223,7 +223,11 @@ class Writing_On_GitHub_Post {
             case 'course':
             	// Course .md files are placed into the a subdirectory directory
             	// corresponding to the course name. Lessons/modules will also go here.
-            	$name = 'courses/' . $this->get_name();
+            	// We use get_the_title because get_name() can return different
+            	// values than what is used for the lesson in some cases (e.g.,
+            	// course was renamed), which causes two directories to appear
+            	// for each course
+            	$name = 'courses/' . sanitize_title(get_the_title($this->id));
             	break;
             case 'lesson':
 				// Lessons need to be organized under courses/course_name/module_name/
