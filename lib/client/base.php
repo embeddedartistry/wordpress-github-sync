@@ -59,7 +59,7 @@ class Writing_On_GitHub_Base_Client {
         }
 
          WP_CLI::debug(sprintf(
-                    __( 'endpoint $s, authorization %s', ),
+                    __( 'endpoint %s, authorization %s', ),
                     $endpoint,
                     $args['headers']['Authorization']
                 ));
