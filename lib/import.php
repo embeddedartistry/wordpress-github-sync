@@ -138,7 +138,7 @@ class Writing_On_GitHub_Import {
 
         // TODO: handle lessons within course hierarchy
         // TODO: drafts needs to be in a per-type?
-        $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/', '_drafts/', 'images/');
+        $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/');
         foreach ($prefixs as $prefix) {
             if ( ! strncasecmp($path, $prefix, strlen( $prefix ) ) ) {
                 return true;
@@ -217,11 +217,6 @@ class Writing_On_GitHub_Import {
      */
     protected function importable_raw_file( Writing_On_GitHub_Blob $blob ) {
         if ( $blob->has_frontmatter() ) {
-            return false;
-        }
-
-        // only images
-        if ( strncasecmp($blob->path(), 'images/', strlen('images/') ) != 0) {
             return false;
         }
 
