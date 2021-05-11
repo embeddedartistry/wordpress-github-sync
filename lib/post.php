@@ -191,12 +191,7 @@ class Writing_On_GitHub_Post {
 
     /**
      * Get GitHub directory based on post
-     * // TODO: course
-     * // TODO: module
-     * // TODO: lesson
-     * // TODO: course needs to be in the course subdir
-     * // TODO: modules need to be in couse/module
-     * // TODO: lessons need ot be in course/module
+     * // TODO: modules??? is there anything to save?
      *
      * @return string
      */
@@ -232,23 +227,8 @@ class Writing_On_GitHub_Post {
             	break;
             case 'lesson':
 				// Lessons need to be organized under courses/course_name/module_name/
-	            WP_CLI::debug(
-	                sprintf(
-	                    __( 'Course id for lesson %s: %d (%s)', 'writing-on-github' ),
-	                    $this->get_name(),
-	                    Sensei()->lesson->get_course_id($this->id),
-	                    get_the_title(Sensei()->lesson->get_course_id($this->id))
-	                )
-	            );
-	            WP_CLI::debug(
-	                sprintf(
-	                    __( 'Module id for lesson %s: %s', 'writing-on-github' ),
-	                    $this->get_name(),
-	                    Sensei()->modules->get_lesson_module($this->id)->name
-	                )
-	            );
-				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
-				$module_name = Sensei()->modules->get_lesson_module($this->id)->name;
+				$course_name = sanitize_title(get_the_title(Sensei()->lesson->get_course_id($this->id)));
+				$module_name = sanitize_title(Sensei()->modules->get_lesson_module($this->id)->name);
 				$name = 'courses/' . $course_name . '/' . $module_name;
 				WP_CLI::debug(
                 sprintf(
