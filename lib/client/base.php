@@ -76,6 +76,8 @@ class Writing_On_GitHub_Base_Client {
             );
         }
 
+        WP_CLI::debug('returning body');
+
         return $body;
     }
 
