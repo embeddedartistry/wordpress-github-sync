@@ -227,6 +227,11 @@ class Writing_On_GitHub_Post {
             	$name = 'newsletters';
             	$name = $name . get_the_time( 'Y/', $this->id );
             	break;
+            case 'course':
+            	// Course .md files are placed into the a subdirectory directory
+            	// corresponding to the course name. Lessons/modules will also go here.
+            	$name = 'courses/' . $this->get_name();
+            	break;
             default:
                 $obj = get_post_type_object( $this->type() );
 
