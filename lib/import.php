@@ -68,10 +68,6 @@ class Writing_On_GitHub_Import {
                 continue;
             }
 
-            // TODO: need to parse out some things differently here!
-            // Courses, for instance, need special handling based on their
-            // directory structure
-
             $blob = $this->app->api()->fetch()->blob( $file );
             // network error ?
             if ( ! $blob instanceof Writing_On_GitHub_Blob ) {
@@ -135,9 +131,6 @@ class Writing_On_GitHub_Import {
     protected function importable_file( Writing_On_GitHub_File_Info $file ) {
 
         $path = $file->path;
-
-        // TODO: handle lessons within course hierarchy
-        // TODO: drafts needs to be in a per-type?
         $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/');
         foreach ($prefixs as $prefix) {
             if ( ! strncasecmp($path, $prefix, strlen( $prefix ) ) ) {
@@ -228,7 +221,6 @@ class Writing_On_GitHub_Import {
      * @param  Writing_On_GitHub_Blob $blob
      * @param  bool                   $is_remove
      */
-    // TODO: does is_remove logic here need to change?
     protected function import_raw_file( Writing_On_GitHub_Blob $blob, $is_remove ) {
         $arr = wp_upload_dir();
         $path = $arr['basedir'] . '/writing-on-github/' . $blob->path();

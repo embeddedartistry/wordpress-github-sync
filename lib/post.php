@@ -191,7 +191,6 @@ class Writing_On_GitHub_Post {
 
     /**
      * Get GitHub directory based on post
-     * // TODO: modules??? is there anything to save?
      *
      * @return string
      */
