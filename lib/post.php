@@ -244,11 +244,11 @@ class Writing_On_GitHub_Post {
 	                sprintf(
 	                    __( 'Module id for lesson %s: %s', 'writing-on-github' ),
 	                    $this->get_name(),
-	                    get_the_title(Sensei()->modules->get_lesson_module($this->id))
+	                    Sensei()->modules->get_lesson_module($this->id)->name
 	                )
 	            );
 				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
-				$module_name = get_the_title(Sensei()->modules->get_lesson_module($this->id));
+				$module_name = Sensei()->modules->get_lesson_module($this->id)->name;
 				$name = 'courses/' . $course_name . '/' . $module_name;
 				WP_CLI::debug(
                 sprintf(
