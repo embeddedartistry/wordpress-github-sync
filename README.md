@@ -80,13 +80,15 @@ The sync action is based on two hooks:
 
 ## Building the Plugin for Release
 
-You cannot clone this repository directly to the server - it needs to be prepared for release with composer. Settings and dependencies are defined in [`composer.json`](composer.json).
+You cannot clone this repository directly to the server - it needs to be prepared for release with composer, or you need to run the command below inside the git repository on the server. 
 
 Run this command from the plugin root:
 
 ```
 $ composer install
 ```
+
+Settings and dependencies are defined in [`composer.json`](composer.json).
 
 
 ## Running Tests
