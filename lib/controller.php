@@ -41,6 +41,14 @@ class Writing_On_GitHub_Controller {
             ) );
         }
 
+         WP_CLI::debug(
+            sprintf(
+                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
+                0
+            )
+        );
+
+
         if ( ! $this->app->request()->is_secret_valid() ) {
             return $this->app->response()->error( new WP_Error(
                 'invalid_headers',
@@ -48,10 +56,26 @@ class Writing_On_GitHub_Controller {
             ) );
         }
 
+         WP_CLI::debug(
+            sprintf(
+                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
+                0
+            )
+        );
+
+
         // ping
         if ( $this->app->request()->is_ping() ) {
             return $this->app->response()->success( __( 'Wordpress is ready.', 'writing-on-github' ) );
         }
+
+         WP_CLI::debug(
+            sprintf(
+                __( 'IMPORT: YOU ARE HERE %d', 'writing-on-github' ),
+                0
+            )
+        );
+
 
         // push
         if ( ! $this->app->request()->is_push() ) {
