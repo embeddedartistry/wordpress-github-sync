@@ -191,17 +191,12 @@ class Writing_On_GitHub_Post {
 
     /**
      * Get GitHub directory based on post
-     * //TODO: course
+     * // TODO: course
      * // TODO: module
      * // TODO: lesson
-     * // TODO: newsletter
-     * // TODO: field-atlas
-     * // TODO: check glossary
-     *	Posts, newsletter: separated by year
      * // TODO: course needs to be in the course subdir
      * // TODO: modules need to be in couse/module
      * // TODO: lessons need ot be in course/module
-     * // Field atlas + glossary + pages: alphabetical, no hierarchy
      *
      * @return string
      */
