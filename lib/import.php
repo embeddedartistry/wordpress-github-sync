@@ -68,6 +68,10 @@ class Writing_On_GitHub_Import {
                 continue;
             }
 
+            // TODO: need to parse out some things differently here!
+            // Courses, for instance, need special handling based on their
+            // directory structure
+
             $blob = $this->app->api()->fetch()->blob( $file );
             // network error ?
             if ( ! $blob instanceof Writing_On_GitHub_Blob ) {

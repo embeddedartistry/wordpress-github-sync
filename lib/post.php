@@ -319,6 +319,8 @@ class Writing_On_GitHub_Post {
      *
      * @return string
      */
+    // TODO: need to expand this to make sure that our courses/lessons/modules
+    // are handled properly here...
     public function get_directory_from_path( $path ) {
         $directory = explode( '/', $path );
         $directory = count( $directory ) > 0 ? $directory[0] : '';
