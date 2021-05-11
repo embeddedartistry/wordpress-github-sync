@@ -244,7 +244,7 @@ class Writing_On_GitHub_Post {
 	                sprintf(
 	                    __( 'Module id for lesson %s: %s', 'writing-on-github' ),
 	                    $this->get_name(),
-	                    get_the_title(Sensei()->modules->get_lesson_module($this->id)
+	                    get_the_title(Sensei()->modules->get_lesson_module($this->id))
 	                )
 	            );
 				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
