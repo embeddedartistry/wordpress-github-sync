@@ -178,10 +178,9 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_new_post',
                 sprintf(
-                    'Create new post %s from WordPress at %s (%s)',
+                    'Create %s from %s',
                     $github_path,
                     site_url(),
-                    get_bloginfo( 'name' )
                 )
             ) . $this->get_commit_msg_tag();
             $result = $persist->create_file( $blob, $message );
@@ -198,10 +197,9 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_update_post',
                 sprintf(
-                    'Update post %s from WordPress at %s (%s)',
+                    'Update %s from %s',
                     $github_path,
-                    site_url(),
-                    get_bloginfo( 'name' )
+                    site_url()
                 )
             ) . $this->get_commit_msg_tag();
             $result = $persist->update_file( $blob, $message );
@@ -237,10 +235,9 @@ class Writing_On_GitHub_Export {
         $message = apply_filters(
             'wogh_commit_msg_delete',
             sprintf(
-                'Deleting %s via WordPress at %s (%s)',
+                'Deleting %s via %s',
                 $github_path,
                 site_url(),
-                get_bloginfo( 'name' )
             ),
             $post
         ) . $this->get_commit_msg_tag();
