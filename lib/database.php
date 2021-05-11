@@ -18,8 +18,6 @@ class Writing_On_GitHub_Database {
 
     /**
      * Currently whitelisted post types.
-     * // TODO: fieldatlas?
-     * // TODO: modules?
      *
      * @var array
      */
@@ -245,6 +243,7 @@ class Writing_On_GitHub_Database {
      *
      * TODO:
      * Likely need to udpate this function to make sure we can recreate the proper path
+     * for courses and modules...
      */
     public function delete_post_by_path( $path ) {
         $query = new WP_Query( array(
@@ -263,7 +262,10 @@ class Writing_On_GitHub_Database {
             $filename  = array_pop( $parts );
             $directory = $parts ? array_shift( $parts ) : '';
 
-            if ( false !== strpos( $directory, 'post' ) ) {
+            if ( false !== strpos( $directory, 'posts' ) ) {
+                $post_id = get_post_id_by_filename( $filename, '/([0-9]{4})-([0-9]{2})-([0-9]{2})-(.*)\.md/' );
+            }
+            else if ( false !== strpos( $directory, 'newsletters' ) ) {
                 $post_id = get_post_id_by_filename( $filename, '/([0-9]{4})-([0-9]{2})-([0-9]{2})-(.*)\.md/' );
             }
 
