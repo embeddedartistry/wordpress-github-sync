@@ -74,10 +74,12 @@ class Writing_On_GitHub_Fetch_Client extends Writing_On_GitHub_Base_Client {
         $data = $this->call( 'GET', $this->tree_endpoint() . '/' . $sha . '?recursive=1' );
 
         if ( is_wp_error( $data ) ) {
+            WP_CLI::debug('wp error returning... for data in tree recursive');
             return $data;
         }
 
         $files = array();
+        WP_CLI::debug('after files array');
 
         foreach ( $data->tree as $index => $thing ) {
             // We need to remove the trees because
