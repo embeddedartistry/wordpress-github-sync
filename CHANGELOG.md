@@ -1,5 +1,10 @@
 ## Changelog ##
 
+### [1.2][1.2] ###
+
+* Adjusted output directories to match Embedded Artistry requirements
+* Added support for custom Embedded Artistry post types
+
 ### [1.11][1.11] ###
 
 * Fixed correct the url of files in the images directory
