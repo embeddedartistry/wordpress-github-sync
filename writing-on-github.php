@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Writing on GitHub
- * Plugin URI: https://github.com/litefeel/writing-on-github
+ * Plugin URI: https://github.com/embeddedartistry/writing-on-github
  * Description: A WordPress plugin to allow you writing on GitHub (or Jekyll site).
  * Version: 1.2
- * Author:  litefeel
- * Author URI: https://www.litefeel.com
+ * Author:  Embedded Artistry
+ * Author URI: https://embeddedartistry.com
  * License: GPLv2
  * Text Domain: writing-on-github
  */
