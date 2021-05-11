@@ -60,7 +60,7 @@ class Writing_On_GitHub_Base_Client {
 
         $response = wp_remote_request( $endpoint, $args );
         $body     = json_decode( wp_remote_retrieve_body( $response ) );
-        $status = $response['code'];
+        $status = wp_remote_retrieve_response_code($response);
 
         //WP_CLI::debug(sprintf(__('status: %d'), $response['response']['code']));
         //WP_CLI::debug(sprintf(__('response: %s'), $response['body']));
