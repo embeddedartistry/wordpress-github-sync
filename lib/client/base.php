@@ -66,6 +66,12 @@ class Writing_On_GitHub_Base_Client {
         $body     = json_decode( wp_remote_retrieve_body( $response ) );
 
         if ( '2' !== substr( $status, 0, 1 ) && '3' !== substr( $status, 0, 1 ) ) {
+            WP_CLI::debug(sprintf(
+                    __( 'Method %s to endpoint %s failed with error: %s', 'writing-on-github' ),
+                    $method,
+                    $endpoint,
+                    ( $body && $body->message ) ? $body->message : 'Unknown error'
+                ));
             return new WP_Error(
                 strtolower( str_replace( ' ', '_', $status ) ),
                 sprintf(
