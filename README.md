@@ -90,6 +90,11 @@ $ composer install
 
 Settings and dependencies are defined in [`composer.json`](composer.json).
 
+## Debugging
+
+```
+$ wp wogh export all 1 --debug
+```
 
 ## Running Tests
 
