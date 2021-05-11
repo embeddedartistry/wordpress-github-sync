@@ -235,7 +235,7 @@ class Writing_On_GitHub_Post {
 				$course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
 				$module_name = get_the_title(Sensei()->modules->get_lesson_module($this->id));
 				$name = 'courses/' . $course_name . '/' . $module_name;
-				WP_CLI::line(
+				WP_CLI::debug(
                 sprintf(
                     __( 'Lesson directory name: %d', 'writing-on-github' ),
                     $name
