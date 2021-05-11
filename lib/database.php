@@ -29,7 +29,7 @@ class Writing_On_GitHub_Database {
         //'glossary',
         //'newsletters',
         'course',
-        'lesson',
+        //'lesson',
         //'fieldatlas'
     );
 
