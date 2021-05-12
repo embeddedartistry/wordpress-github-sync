@@ -105,6 +105,7 @@ class Writing_On_GitHub_Import {
         $result = $this->app->api()->fetch()->tree_recursive();
 
         if ( is_wp_error( $result ) ) {
+            WP_CLI::debug('Error detected on tree_recursive!');
             /* @var WP_Error $result */
             return $result;
         }
