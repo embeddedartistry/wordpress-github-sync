@@ -104,6 +104,7 @@ class Writing_On_GitHub_Controller {
         remove_action( 'delete_post', array( $this->controller, 'delete_post' ) );
 
         if ( $user_id ) {
+            error_log(sprintf(__('IMPORT SETTING USER ID: %d'), $user_id));
             wp_set_current_user( $user_id );
         }
 
@@ -141,6 +142,7 @@ class Writing_On_GitHub_Controller {
         $this->app->semaphore()->lock();
 
         if ( $user_id ) {
+            error_log(sprintf(__('EXPORT SETTING USER ID: %d'), $user_id));
             wp_set_current_user( $user_id );
         }
 
