@@ -222,7 +222,8 @@ class Writing_On_GitHub_Post {
             	break;
             case 'lesson':
 				// Lessons need to be organized under courses/course_name/module_name/
-                $course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
+                $course_id = Sensei()->lesson->get_course_id($this->id);
+                $course_name = get_the_title($course_id);
 				$name = 'courses/' . sanitize_title($course_name);
 				$module = Sensei()->modules->get_lesson_module($this->id);
 				if($module)
@@ -231,9 +232,31 @@ class Writing_On_GitHub_Post {
                 }
                 else
 				{
-					error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
+                    error_log('Attempting fallback search plan');
+                    $all_modules = Sensei()->modules->get_course_module_order($course_id);
+                    foreach($all_modules as $module)
+                    {
+                        $lessons_in_module = Sensei()->modules->get_lessons($course_id, $module);
+                        if(in_array($this->id, $lessons_in_module))
+                        {
+                            // we have the module!
+                            $module_name = sanitize_title($lessons_in_module->name);
+                            break;
+                        }
+                    }
+
+                    // If this was set, we found a match in the loop. Otherwise we weren't able to
+                    // determine the module's name (permissions error, likely)
+                    if(isset($module_name))
+                    {
+                        $name = $name . '/' . $module_name;
+                    }
+                    else
+                    {
+                        error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
+                    }
 				}
-				error_log(sprintf(__('lesson directory: %s'), $name));
+
 				break;
             default:
                 $obj = get_post_type_object( $this->type() );
