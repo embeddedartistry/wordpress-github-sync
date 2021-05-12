@@ -235,7 +235,7 @@ class Writing_On_GitHub_Post {
 				// Get the last item in the array as there should be only one really
                 foreach($modules as $module)
                 {
-                    $break;
+                    break;
                 }
 
 				if(isset($module) && is_object($module))
