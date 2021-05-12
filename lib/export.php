@@ -94,7 +94,10 @@ class Writing_On_GitHub_Export {
             return $this->delete( $post_id );
         }
 
-
+        if ( $old_github_path = $this->github_path( $post->id() ) ) {
+            error_log("old_github_path: $old_github_path");
+            $post->set_old_github_path($old_github_path);
+        }
 
         $result = $this->export_post( $post );
 
