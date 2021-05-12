@@ -135,6 +135,7 @@ class Writing_On_GitHub_Database {
             return $post_id;
         }
 
+        // TODO: disable this... posting only from website
         if ( $post->is_new() ) {
             $author = false;
             $meta = $post->get_meta();
