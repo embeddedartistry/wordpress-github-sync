@@ -157,7 +157,7 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_move_post',
                 sprintf(
-                    'Move %s to %s via %s',
+                    'Move %s to %s via %s (two part commit)',
                     $old_github_path, $github_path,
                     site_url(),
                 )
