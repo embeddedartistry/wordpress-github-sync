@@ -233,7 +233,7 @@ class Writing_On_GitHub_Post {
                 else
 				{
                     error_log('Attempting fallback search plan');
-                    $all_modules = Sensei()->modules->get_course_module_order($course_id);
+                    $all_modules = Sensei()->modules->get_course_modules($course_id);
                     foreach($all_modules as $module)
                     {
                         error_log(sprintf(__('Checking a module for match: %s'), $module->name));
