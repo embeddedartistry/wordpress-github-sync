@@ -232,6 +232,11 @@ class Writing_On_GitHub_Post {
                     error_log(sprintf(__('Error accessing taxonomy: %s'), $modules->get_error_message()));
                 }
 
+                if(!isset($modules) || $modules == false)
+                {
+                    error_log('Taxonomy for lesson not available...\n');
+                }
+
 				// Get the last item in the array as there should be only one really
                 foreach($modules as $module)
                 {
