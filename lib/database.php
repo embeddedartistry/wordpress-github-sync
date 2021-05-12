@@ -102,10 +102,11 @@ class Writing_On_GitHub_Database {
                 'unsupported_post',
                 sprintf(
                     __(
-                        'Post ID %s is not supported by WOGH. See wiki to find out how to add support.',
+                        'Post ID %s (name %s) is not supported by WOGH. See wiki to find out how to add support.',
                         'writing-on-github'
                     ),
-                    $post_id
+                    $post_id,
+                    $this->get_name()
                 )
             );
         }
