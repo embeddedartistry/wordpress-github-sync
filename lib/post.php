@@ -134,10 +134,6 @@ class Writing_On_GitHub_Post {
             $this->post_content();
 
         return $this->front_matter() . $content;
-        // $content = $this->front_matter() . $content;
-        // $ending  = apply_filters( 'wogh_line_endings', "\n" );
-
-        // return preg_replace( '~(*BSR_ANYCRLF)\R~', $ending, $content );
     }
 
     /**

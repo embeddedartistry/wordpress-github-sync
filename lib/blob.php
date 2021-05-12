@@ -191,9 +191,6 @@ class Writing_On_GitHub_Blob {
             if ( 'yes' == get_option('wogh_ignore_author') ) {
                 unset($meta['author']);
             }
-            // if ( isset( $meta['link'] ) ) {
-            //  $meta['link'] = str_replace( home_url(), '', $meta['link'] );
-            // }
         }
 
         return $meta;
