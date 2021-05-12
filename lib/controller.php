@@ -71,6 +71,7 @@ class Writing_On_GitHub_Controller {
 
         $this->app->semaphore()->lock();
         remove_action( 'save_post', array( $this, 'export_post' ) );
+        remove_action( 'delete_post', array( $this->controller, 'delete_post' ) );
 
         $result = $this->app->import()->payload( $payload );
 
@@ -100,6 +101,7 @@ class Writing_On_GitHub_Controller {
 
         $this->app->semaphore()->lock();
         remove_action( 'save_post', array( $this, 'export_post' ) );
+        remove_action( 'delete_post', array( $this->controller, 'delete_post' ) );
 
         if ( $user_id ) {
             wp_set_current_user( $user_id );
