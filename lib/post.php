@@ -225,8 +225,15 @@ class Writing_On_GitHub_Post {
                 $course_id = Sensei()->lesson->get_course_id($this->id);
                 $course_name = get_the_title($course_id);
 				$name = 'courses/' . sanitize_title($course_name);
-				$module = Sensei()->modules->get_lesson_module($this->id);
-				if($module)
+                $modules = wp_get_post_terms($this->id);
+
+				// Get the last item in the array as there should be only one really
+                foreach($modules as $module)
+                {
+                    $break;
+                }
+
+				if(isset($module) && is_object($module) && ! is_wp_error($module))
                 {
                     $name = $name . '/' . sanitize_title($module->name);
                 }
