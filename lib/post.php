@@ -236,12 +236,20 @@ class Writing_On_GitHub_Post {
                     $all_modules = Sensei()->modules->get_course_module_order($course_id);
                     foreach($all_modules as $module)
                     {
-                        error_log('Checking a module for match');
+                        error_log(sprintf(__('Checking a module for match: %s'), $module->name));
                         $lessons_in_module = Sensei()->modules->get_lessons($course_id, $module);
-                        if(in_array($this, $lessons_in_module))
+                        foreach($lessons_in_module as $lesson)
                         {
-                            // we have the module!
-                            $module_name = sanitize_title($lessons_in_module->name);
+                            if($this->ID == $lesson->ID)
+                            {
+                                // We have the module
+                                $module_name = sanitize_title($module->name);
+                                break;
+                            }
+                        }
+
+                        if(isset($module_name))
+                        {
                             break;
                         }
                     }
