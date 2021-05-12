@@ -222,14 +222,17 @@ class Writing_On_GitHub_Post {
             	break;
             case 'lesson':
 				// Lessons need to be organized under courses/course_name/module_name/
-				$course_name = sanitize_title(get_the_title(Sensei()->lesson->get_course_id($this->id)));
+                $course_name = get_the_title(Sensei()->lesson->get_course_id($this->id));
+				$name = 'courses/' . sanitize_title($course_name);
 				$module = Sensei()->modules->get_lesson_module($this->id);
-				if(! $module)
+				if($module)
+                {
+                    $name = $name . '/' . sanitize_title($module->name);
+                }
+                else
 				{
 					error_log('Module could not be grabbed!');
 				}
-				$module_name = sanitize_title($module->name);
-				$name = 'courses/' . $course_name . '/' . $module_name;
 				error_log(sprintf(__('lesson directory: %s'), $name));
 				break;
             default:
