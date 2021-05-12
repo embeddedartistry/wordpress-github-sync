@@ -237,7 +237,7 @@ class Writing_On_GitHub_Post {
                     foreach($all_modules as $module)
                     {
                         $lessons_in_module = Sensei()->modules->get_lessons($course_id, $module);
-                        if(in_array($this->id, $lessons_in_module))
+                        if(in_array($this, $lessons_in_module))
                         {
                             // we have the module!
                             $module_name = sanitize_title($lessons_in_module->name);
