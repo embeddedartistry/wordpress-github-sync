@@ -228,13 +228,12 @@ class Writing_On_GitHub_Post {
 				$module = Sensei()->modules->get_lesson_module($this->id);
 				if($module)
                 {
-                    $name = $name . '/' . sanitize_title($module->display_name);
+                    $name = $name . '/' . sanitize_title($module->name);
                 }
                 else
 				{
                     error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
 				}
-
 				break;
             default:
                 $obj = get_post_type_object( $this->type() );
