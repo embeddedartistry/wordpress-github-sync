@@ -247,7 +247,7 @@ class Writing_On_GitHub_Post {
                 {
                     $name = $name . '/' . sanitize_title($module->name);
                 }
-                elseif(is_wp_error($module))
+                elseif(isset($module) && is_wp_error($module))
                 {
                     error_log(sprintf(__('Error accessing module: %s'), $module->get_error_message()));
                 }
