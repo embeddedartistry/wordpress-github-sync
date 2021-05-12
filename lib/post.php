@@ -225,36 +225,16 @@ class Writing_On_GitHub_Post {
                 $course_id = Sensei()->lesson->get_course_id($this->id);
                 $course_name = get_the_title($course_id);
 				$name = 'courses/' . sanitize_title($course_name);
-                $modules = wp_get_post_terms($this->id, 'module');
-
-                if(is_wp_error($modules))
-                {
-                    error_log(sprintf(__('Error accessing taxonomy: %s'), $modules->get_error_message()));
-                }
-
-                if(!isset($modules) || $modules == false)
-                {
-                    error_log('Taxonomy for lesson not available...\n');
-                }
-
-				// Get the last item in the array as there should be only one really
-                foreach($modules as $module)
-                {
-                    break;
-                }
-
-				if(isset($module) && is_object($module))
+				$module = Sensei()->modules->get_lesson_module($this->id);
+				if($module)
                 {
                     $name = $name . '/' . sanitize_title($module->name);
-                }
-                elseif(isset($module) && is_wp_error($module))
-                {
-                    error_log(sprintf(__('Error accessing module: %s'), $module->get_error_message()));
                 }
                 else
 				{
                     error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
 				}
+
 				break;
             default:
                 $obj = get_post_type_object( $this->type() );
