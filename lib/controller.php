@@ -104,7 +104,7 @@ class Writing_On_GitHub_Controller {
         remove_action( 'delete_post', array( $this->controller, 'delete_post' ) );
 
         if ( $user_id ) {
-            //TODO: DISABLE TEMPORARILY wp_set_current_user( $user_id );
+            wp_set_current_user( $user_id );
         }
 
         $result = $this->app->import()->master( $force );
@@ -141,7 +141,7 @@ class Writing_On_GitHub_Controller {
         $this->app->semaphore()->lock();
 
         if ( $user_id ) {
-            //TODO: DISABLE TEMPORARILY wp_set_current_user( $user_id );
+            wp_set_current_user( $user_id );
         }
 
         $result = $this->app->export()->full($force);
