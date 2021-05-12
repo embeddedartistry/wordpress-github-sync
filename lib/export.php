@@ -157,10 +157,9 @@ class Writing_On_GitHub_Export {
             $message = apply_filters(
                 'wogh_commit_msg_move_post',
                 sprintf(
-                    'Move %s to %s via WordPress at %s (%s)',
+                    'Move %s to %s via %s',
                     $old_github_path, $github_path,
                     site_url(),
-                    get_bloginfo( 'name' )
                 )
             ) . $this->get_commit_msg_tag();
 
