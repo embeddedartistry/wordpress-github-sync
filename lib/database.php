@@ -106,7 +106,7 @@ class Writing_On_GitHub_Database {
                         'writing-on-github'
                     ),
                     $post_id,
-                    $this->get_name()
+                    get_the_title($post_id)
                 )
             );
         }
