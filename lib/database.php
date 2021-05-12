@@ -102,7 +102,7 @@ class Writing_On_GitHub_Database {
                 'unsupported_post',
                 sprintf(
                     __(
-                        'Post ID %s (name %s) is not supported by WOGH. See wiki to find out how to add support.',
+                        'Post ID %s (name %s) is not supported at this time.',
                         'writing-on-github'
                     ),
                     $post_id,
@@ -278,19 +278,23 @@ class Writing_On_GitHub_Database {
      */
     protected function is_post_supported( Writing_On_GitHub_Post $post ) {
         if ( wp_is_post_revision( $post->id ) ) {
+            error_log(sprintf(__('Post ID %d is not post revision'), $post->id));
             return false;
         }
 
         // We need to allow trashed posts to be queried, but they are not whitelisted for export.
         if ( ! in_array( $post->status(), $this->get_whitelisted_post_statuses() ) && 'trash' !== $post->status() ) {
+            error_log(sprintf(__('Post ID %d has status %s, which is not whitelisted'), $post->id, $post->status()));
             return false;
         }
 
         if ( ! in_array( $post->type(), $this->get_whitelisted_post_types() ) ) {
+            error_log(sprintf(__('Post ID %d has type %s, which is not whitelisted'), $post->id, $post->type()));
             return false;
         }
 
         if ( $post->has_password() ) {
+            error_log(sprintf(__('Post ID %d has a password'), $post->id));
             return false;
         }
 
