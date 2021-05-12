@@ -228,42 +228,11 @@ class Writing_On_GitHub_Post {
 				$module = Sensei()->modules->get_lesson_module($this->id);
 				if($module)
                 {
-                    $name = $name . '/' . sanitize_title($module->name);
+                    $name = $name . '/' . sanitize_title($module->display_name);
                 }
                 else
 				{
-                    error_log('Attempting fallback search plan');
-                    $all_modules = Sensei()->modules->get_course_modules($course_id);
-                    foreach($all_modules as $module)
-                    {
-                        error_log(sprintf(__('Checking a module for match: %s'), $module->name));
-                        $lessons_in_module = Sensei()->modules->get_lessons($course_id, $module);
-                        foreach($lessons_in_module as $lesson)
-                        {
-                            if($this->ID == $lesson->ID)
-                            {
-                                // We have the module
-                                $module_name = sanitize_title($module->name);
-                                break;
-                            }
-                        }
-
-                        if(isset($module_name))
-                        {
-                            break;
-                        }
-                    }
-
-                    // If this was set, we found a match in the loop. Otherwise we weren't able to
-                    // determine the module's name (permissions error, likely)
-                    if(isset($module_name))
-                    {
-                        $name = $name . '/' . $module_name;
-                    }
-                    else
-                    {
-                        error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
-                    }
+                    error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
 				}
 
 				break;
