@@ -231,7 +231,7 @@ class Writing_On_GitHub_Post {
                 }
                 else
 				{
-					error_log('Module could not be grabbed!');
+					error_log(sprintf(__('Module for lesson %s could not be grabbed!'), $this->get_name()));
 				}
 				error_log(sprintf(__('lesson directory: %s'), $name));
 				break;
