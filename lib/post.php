@@ -233,9 +233,13 @@ class Writing_On_GitHub_Post {
                     $break;
                 }
 
-				if(isset($module) && is_object($module) && ! is_wp_error($module))
+				if(isset($module) && is_object($module))
                 {
                     $name = $name . '/' . sanitize_title($module->name);
+                }
+                else if(is_wp_error($module))
+                {
+                    error_log(sprintf(__('Error accessing module: %s'), $module->get_error_message()));
                 }
                 else
 				{
