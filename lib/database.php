@@ -330,8 +330,11 @@ class Writing_On_GitHub_Database {
             $user = empty($users) ? false : $users[0];
         }
 
+        error_log(sprintf(__('USER: %s'), $user));
+
         if ( ! $user ) {
             // Use the default user.
+            error_log('Using the default user!');
             $user = get_user_by( 'id', (int) get_option( 'wogh_default_user' ) );
         }
 
