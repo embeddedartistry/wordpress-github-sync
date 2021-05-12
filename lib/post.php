@@ -225,7 +225,7 @@ class Writing_On_GitHub_Post {
                 $course_id = Sensei()->lesson->get_course_id($this->id);
                 $course_name = get_the_title($course_id);
 				$name = 'courses/' . sanitize_title($course_name);
-                $modules = wp_get_post_terms($this->id);
+                $modules = wp_get_post_terms($this->id, 'module');
 
                 if(is_wp_error($modules))
                 {
