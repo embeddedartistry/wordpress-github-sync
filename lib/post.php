@@ -227,6 +227,11 @@ class Writing_On_GitHub_Post {
 				$name = 'courses/' . sanitize_title($course_name);
                 $modules = wp_get_post_terms($this->id);
 
+                if(is_wp_error($modules))
+                {
+                    error_log(sprintf(__('Error accessing taxonomy: %s'), $modules->get_error_message()));
+                }
+
 				// Get the last item in the array as there should be only one really
                 foreach($modules as $module)
                 {
