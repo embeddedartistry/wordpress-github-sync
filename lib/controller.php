@@ -73,7 +73,12 @@ class Writing_On_GitHub_Controller {
         remove_action( 'save_post', array( $this, 'export_post' ) );
         remove_action( 'delete_post', array( $this, 'delete_post' ) );
 
-        // TODO: set user here to the default person
+        // Here we set the user ID to the configured default so that when we
+        // import the post, it is done with the same permissions as the initial export.
+        // This prevents problems with things like Heapless C++ course modules
+        // working in a forced export, but not when we export the lesson page.
+        wp_set_current_user( get_option( 'wogh_default_user' ) );
+        error_log(sprintf(__("IMPORT Setting current user to: %d"), get_option( 'wogh_default_user' )));
 
         $result = $this->app->import()->payload( $payload );
 
@@ -191,7 +196,7 @@ class Writing_On_GitHub_Controller {
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
         wp_set_current_user( get_option( 'wogh_default_user' ) );
-        error_log(sprintf(__("Setting current user to: %d"), get_option( 'wogh_default_user' )));
+        error_log(sprintf(__("EXPORT Setting current user to: %d"), get_option( 'wogh_default_user' )));
 
         $this->app->semaphore()->lock();
         $result = $this->app->export()->update( $post_id );
