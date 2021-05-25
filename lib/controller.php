@@ -191,6 +191,7 @@ class Writing_On_GitHub_Controller {
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
         wp_set_current_user( get_option( 'wogh_default_user' ) );
+        error_log(sprintf(__("Setting current user to: %d"), get_option( 'wogh_default_user' )));
 
         $this->app->semaphore()->lock();
         $result = $this->app->export()->update( $post_id );
