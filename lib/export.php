@@ -146,8 +146,6 @@ class Writing_On_GitHub_Export {
             return $blob;
         }
 
-        error_log(sprintf(__('EXPORTING POST WITH USER ID: %d'), wp_get_current_user_id());
-
         $result = false;
 
         $persist = $this->app->api()->persist();
