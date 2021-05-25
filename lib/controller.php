@@ -73,6 +73,8 @@ class Writing_On_GitHub_Controller {
         remove_action( 'save_post', array( $this, 'export_post' ) );
         remove_action( 'delete_post', array( $this, 'delete_post' ) );
 
+        // TODO: set user here to the default person
+
         $result = $this->app->import()->payload( $payload );
 
         $this->app->semaphore()->unlock();
@@ -183,6 +185,12 @@ class Writing_On_GitHub_Controller {
                 sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'writing-on-github' ), 'Controller::export_post()' )
             ) );
         }
+
+        // Here we set the user ID to the configured default so that when we
+        // export the post, it is done with the same permissions as the initial export.
+        // This prevents problems with things like Heapless C++ course modules
+        // working in a forced export, but not when we export the lesson page.
+        wp_set_current_user( get_option( 'wogh_default_user' ) );
 
         $this->app->semaphore()->lock();
         $result = $this->app->export()->update( $post_id );
