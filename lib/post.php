@@ -232,7 +232,7 @@ class Writing_On_GitHub_Post {
                     // because Sensei is putting those in place for admin users
                     // which causes problems when importing or exporting post changes
                     $exploded_module_name = explode('(', $module->name);
-                    $name = $name . '/' . sanitize_title($exploded_module_name);
+                    $name = $name . '/' . sanitize_title($exploded_module_name[0]);
                 }
                 else
 				{
