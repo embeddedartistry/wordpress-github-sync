@@ -228,7 +228,11 @@ class Writing_On_GitHub_Post {
 				$module = Sensei()->modules->get_lesson_module($this->id);
 				if($module)
                 {
-                    $name = $name . '/' . sanitize_title($module->name);
+                    // We want to remove author names from module names
+                    // because Sensei is putting those in place for admin users
+                    // which causes problems when importing or exporting post changes
+                    $exploded_module_name = explode('(', $module->name);
+                    $name = $name . '/' . sanitize_title($exploded_module_name);
                 }
                 else
 				{
