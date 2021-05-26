@@ -279,23 +279,23 @@ class Writing_On_GitHub_Database {
      */
     protected function is_post_supported( Writing_On_GitHub_Post $post ) {
         if ( wp_is_post_revision( $post->id ) ) {
-            write_log(sprintf(__('Post ID %d is not post revision'), $post->id));
+            error_log(sprintf(__('Post ID %d is not post revision'), $post->id));
             return false;
         }
 
         // We need to allow trashed posts to be queried, but they are not whitelisted for export.
         if ( ! in_array( $post->status(), $this->get_whitelisted_post_statuses() ) && 'trash' !== $post->status() ) {
-            write_log(sprintf(__('Post ID %d has status %s, which is not whitelisted'), $post->id, $post->status()));
+            error_log(sprintf(__('Post ID %d has status %s, which is not whitelisted'), $post->id, $post->status()));
             return false;
         }
 
         if ( ! in_array( $post->type(), $this->get_whitelisted_post_types() ) ) {
-            write_log(sprintf(__('Post ID %d has type %s, which is not whitelisted'), $post->id, $post->type()));
+            error_log(sprintf(__('Post ID %d has type %s, which is not whitelisted'), $post->id, $post->type()));
             return false;
         }
 
         if ( $post->has_password() ) {
-            write_log(sprintf(__('Post ID %d has a password'), $post->id));
+            error_log(sprintf(__('Post ID %d has a password'), $post->id));
             return false;
         }
 
@@ -331,8 +331,11 @@ class Writing_On_GitHub_Database {
             $user = empty($users) ? false : $users[0];
         }
 
+        error_log(sprintf(__('USER: %s'), $user));
+
         if ( ! $user ) {
             // Use the default user.
+            error_log('Using the default user!');
             $user = get_user_by( 'id', (int) get_option( 'wogh_default_user' ) );
         }
 

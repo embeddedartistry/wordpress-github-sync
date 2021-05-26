@@ -78,6 +78,7 @@ class Writing_On_GitHub_Controller {
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
         wp_set_current_user( get_option( 'wogh_default_user' ) );
+        error_log(sprintf(__("IMPORT Setting current user to: %d"), get_option( 'wogh_default_user' )));
 
         $result = $this->app->import()->payload( $payload );
 
@@ -110,6 +111,7 @@ class Writing_On_GitHub_Controller {
         remove_action( 'delete_post', array( $this, 'delete_post' ) );
 
         if ( $user_id ) {
+            error_log(sprintf(__('IMPORT SETTING USER ID: %d'), $user_id));
             wp_set_current_user( $user_id );
         }
 
@@ -147,6 +149,7 @@ class Writing_On_GitHub_Controller {
         $this->app->semaphore()->lock();
 
         if ( $user_id ) {
+            error_log(sprintf(__('EXPORT SETTING USER ID: %d'), $user_id));
             wp_set_current_user( $user_id );
         }
 
@@ -193,6 +196,7 @@ class Writing_On_GitHub_Controller {
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
         wp_set_current_user( get_option( 'wogh_default_user' ) );
+        error_log(sprintf(__("EXPORT Setting current user to: %d"), get_option( 'wogh_default_user' )));
 
         $this->app->semaphore()->lock();
         $result = $this->app->export()->update( $post_id );
