@@ -107,6 +107,13 @@ Writing On GitHub exports all posts as `.md` files for better display on GitHub 
 You can also activate the Markdown module from [Jetpack](https://wordpress.org/plugins/jetpack/) or the standalone [JP Markdown](https://wordpress.org/plugins/jetpack-markdown/) to save in Markdown and export that version to GitHub. 
 
 > **Note:** There is a limitation with at least the Jetpack Markdown plugin. It will export both the markdown and the HTML contents. changes are not reflected properly unless you edit both.
+> 
+## Website Dependencies
+
+This plugin depends on the following plugins to be installed:
+
+- WP Rocket (for clearing the cache when a post is updated)
+- Sensei LMS suite (for accessing course and lesson content)
 
 ### Prior Art ###
 
