@@ -95,7 +95,7 @@ class Writing_On_GitHub_Export {
         }
 
         if ( $old_github_path = $this->github_path( $post->id() ) ) {
-            error_log("old_github_path: $old_github_path");
+            write_log("old_github_path: $old_github_path");
             $post->set_old_github_path($old_github_path);
         }
 
