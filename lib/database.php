@@ -144,17 +144,10 @@ class Writing_On_GitHub_Database {
 
         update_post_meta( $post_id, '_wogh_sha', $meta['_wogh_sha'] );
 
-        // unset( $meta['tags'] );
-        // unset( $meta['categories'] );
-        // unset( $meta['author'] );
-        // unset( $meta['post_date'] );
-        // unset( $meta['post_excerpt'] );
-        // unset( $meta['permalink'] );
-        // unset( $meta['link'] );
+        // This call will flush the cache for this post and for associated items
+        // (such as tag pages, archive pages, etc.)
+        rocket_clean_post($post_id);
 
-        // foreach ( $meta as $key => $value ) {
-        //  update_post_meta( $post_id, $key, $value );
-        // }
         return true;
     }
 
