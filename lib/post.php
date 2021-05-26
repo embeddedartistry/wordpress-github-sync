@@ -181,7 +181,7 @@ class Writing_On_GitHub_Post {
      */
     public function github_path() {
         $path = $this->github_directory() . $this->github_filename();
-        error_log(sprintf(__('github directory: %s, github_filename: %s'), $this->github_directory(), $this->github_filename()));
+        //error_log(sprintf(__('github directory: %s, github_filename: %s'), $this->github_directory(), $this->github_filename()));
 
         return $path;
     }
