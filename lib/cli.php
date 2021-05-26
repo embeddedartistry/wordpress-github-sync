@@ -51,6 +51,16 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
             WP_CLI::error( __( 'Invalid user ID', 'writing-on-github' ) );
         }
 
+
+        if( $user_id == 0 )
+        {
+            wp_set_current_user( get_option( 'wogh_default_user' ) );
+        }
+        else
+        {
+            wp_set_current_user( $user_id );
+        }
+
         // TODO: not used in CLI, was broken. $this->app->export()->set_user( $user_id );
 
         if ( 'all' === $post_id ) {
