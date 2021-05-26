@@ -61,8 +61,6 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
             wp_set_current_user( $user_id );
         }
 
-        // TODO: not used in CLI, was broken. $this->app->export()->set_user( $user_id );
-
         if ( 'all' === $post_id ) {
             WP_CLI::line( __( 'Starting full export to GitHub.', 'writing-on-github' ) );
             $this->app->controller()->export_all();

@@ -250,18 +250,6 @@ class Writing_On_GitHub_Export {
         return __( 'Export to GitHub completed successfully.', 'writing-on-github' );
     }
 
-
-    /**
-     * Saves the export user to the database.
-     *
-     * @param int $user_id User ID to export with.
-     *
-     * @return bool
-     */
-    public function set_user( $user_id ) {
-        return update_option( self::EXPORT_USER_OPTION, (int) $user_id );
-    }
-
     /**
      * Gets the commit message tag.
      *
