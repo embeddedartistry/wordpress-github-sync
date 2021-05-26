@@ -1,78 +1,45 @@
-# Embedded Artistry: Writing On GitHub #
-
-TODO: Update litefeel refeernces to embedded artistry
-    - lib/client/fetch.php
-    - test data
-    - change log
-    - Readme
+# Embedded Artistry: Writing On GitHub Wordpress Plugin
 
 **License:** GPLv2  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
-A WordPress plugin to allow you writing on GitHub (or Jekyll site).
+## Description
 
-## Description ##
+This WordPress plugin allows you writing on GitHub (or Jekyll site). This was forked from [litefeel/writing-on-github](https://github.com/litefeel/writing-on-github) and contains modifications specific to the Embedded Artistry website.
 
-*A WordPress plugin to allow you writing on GitHub (or Jekyll site).*
+### Plugin Purpose
 
-Some code for this plugin comes from [Wordpress GitHub Sync](https://github.com/mAAdhaTTah/wordpress-github-sync), thanks.
+This plugin provides the following services to our organization:
 
-Ever wish you could collaboratively author content for your WordPress site (or expose change history publicly and accept pull requests from your readers)?
+1. Posts of specified types are automatically exported to the associated GitHub repository upon creation
+2. Edits to a post on the Wordpress front-end will be synchronized to GitHub
+3. Changes made in the GitHub repository will be synchronized with the Wordpress front-end.
 
-Well, now you can! Introducing [Writing On GitHub](https://github.com/litefeel/writing-on-github)!
+Specified types:
 
-### Writing On GitHub does three things: ###
+- post
+- page
+- courses
+- lessons
+- newsletters
+- Field Atlas entries
+- Glossary entries
 
-1.  Allows content publishers to version their content in GitHub
-2.  Allows readers to submit proposed improvements to WordPress-served content via GitHub's Pull Request model
+Caveats:
 
-Note that it does not, however, allow for deleting posts on the front-end by removing the file in the repository. This prevents production websites from being taken down by a thoughtless commit.
+- Posts cannot be deleted on the front-end by removing files from the repository
+- Posts cannot be added to the front-end by adding new files with the appropriate metadata header to the repository (unlike the litefeel version)
 
-### Writing On GitHub might be able to do some other cool things: ###
+These limitations are in place to prevent front-end problems, whether due to a bad commit or due to the need for complex 
 
-* Allow teams to collaboratively write and edit posts using GitHub (e.g., pull requests, issues, comments)
-* Allow you to sync the content of two different WordPress installations via GitHub
-* Allow you to stage and preview content before "deploying" to your production server
+## How the Plugin Works
 
-### How it works ###
-
-The sync action is based on two hooks:
+The sync action is based on two webhooks:
 
 1. A per-post sync fired in response to WordPress's `save_post` hook which pushes content to GitHub
 2. A sync of all changed files triggered by GitHub's `push` webhook (outbound API call)
 
-## Installation ##
-
-### Using the WordPress Dashboard ###
-
-1. Navigate to the 'Add New' in the plugins dashboard
-2. Search for 'Writing On GitHub'
-3. Click 'Install Now'
-4. Activate the plugin on the Plugin dashboard
-
-### Uploading in WordPress Dashboard ###
-
-1. Download `writing-on-github.zip` from the WordPress plugins repository.
-2. Navigate to the 'Add New' in the plugins dashboard
-3. Navigate to the 'Upload' area
-4. Select `writing-on-github.zip` from your computer
-5. Click 'Install Now'
-6. Activate the plugin in the Plugin dashboard
-
-### Using FTP ###
-
-1. Download `writing-on-github.zip`
-2. Extract the `writing-on-github` directory to your computer
-3. Upload the `writing-on-github` directory to the `/wp-content/plugins/` directory
-4. Activate the plugin in the Plugin dashboard
-
-
-### Configuring the plugin ###
-
-1. [Create a personal oauth token](https://github.com/settings/tokens/new) with the `public_repo` scope. If you'd prefer not to use your account, you can create another GitHub account for this.
-2. Configure your GitHub host, repository, secret (defined in the next step),  and OAuth Token on the Writing On GitHub settings page within WordPress's administrative interface. Make sure the repository has an initial commit or the export will fail.
-3. Create a WebHook within your repository with the provided callback URL and callback secret, using `application/json` as the content type. To set up a webhook on GitHub, head over to the **Settings** page of your repository, and click on **Webhooks & services**. After that, click on **Add webhook**.
-4. Click `Export to GitHub`
+The plugin runs the import/export path as the configured user (set in the Wordpress front-end settings page for this plugin). This user must have the appropriate permissions to access the relevant content.
 
 ## Building the Plugin for Release
 
@@ -86,71 +53,64 @@ $ composer install
 
 Settings and dependencies are defined in [`composer.json`](composer.json).
 
-## Debugging
+Once composer has been installed, you can 
+
+## Installing the Plugin
+
+### Uploading in WordPress Dashboard ###
+
+TODO: UPDATE THIS ONCE PROCESS IS IMPROVED
+
+2. Navigate to the 'Add New' in the Wordpress Plugin dashboard
+3. Navigate to the 'Upload' area
+4. Select `writing-on-github.zip` from your computer
+5. Click 'Install Now'
+6. Activate the plugin in the Plugin dashboard
+
+### Cloning Git Repository
+
+You can also SSH into the web server. Navigate to `public_html/wp_content/plugins` and clone the repository:
 
 ```
-$ wp wogh export all 0 --debug
+git clone https://github.com/embeddedartistry/writing-on-github.git
+```
+
+Enter the directory and run `composer install`. 
+
+Now you can navigate to the Plugin dashboard in the Wordpress front-end and activate the new plugin.
+
+## Configuring the plugin ###
+
+1. [Create a personal oauth token](https://github.com/settings/tokens/new) with the `public_repo` scope. If you'd prefer not to use your account, you can create another GitHub account for this.
+2. Configure your GitHub host, repository, secret (defined in the next step),  and OAuth Token on the Writing On GitHub settings page within WordPress's administrative interface. Make sure the repository has an initial commit or the export will fail.
+3. Create a WebHook within your repository with the provided callback URL and callback secret, using `application/json` as the content type. To set up a webhook on GitHub, head over to the **Settings** page of your repository, and click on **Webhooks & services**. After that, click on **Add webhook**.
+4. Click `Export to GitHub`
+
+## Debugging
+
+### Manual Export via CLI
+
+You can export posts through the CLI using this command. Note that a user ID of `0` will use the default configured in the admin screen.
+
+```
+$ wp wogh export all <user id> --debug
 ```
 
 ## Running Tests
 
 TODO
 
-## Frequently Asked Questions ##
+## Markdown Support ###
 
-### Markdown Support ###
+Writing On GitHub exports all posts as `.md` files for better display on GitHub (and, importantly for us, for use with pandoc for generating e-book files) However, note that all content is exported and imported as its original HTML. To enable writing, importing, and exporting in Markdown, please install and enable [WP-Markdown](https://wordpress.org/plugins/wp-markdown/), and Writing On GitHub will use it to convert your posts to and from Markdown.
 
-Writing On GitHub exports all posts as `.md` files for better display on GitHub, but all content is exported and imported as its original HTML. To enable writing, importing, and exporting in Markdown, please install and enable [WP-Markdown](https://wordpress.org/plugins/wp-markdown/), and Writing On GitHub will use it to convert your posts to and from Markdown.
+You can also activate the Markdown module from [Jetpack](https://wordpress.org/plugins/jetpack/) or the standalone [JP Markdown](https://wordpress.org/plugins/jetpack-markdown/) to save in Markdown and export that version to GitHub. 
 
-You can also activate the Markdown module from [Jetpack](https://wordpress.org/plugins/jetpack/) or the standalone [JP Markdown](https://wordpress.org/plugins/jetpack-markdown/) to save in Markdown and export that version to GitHub.
-
-### GitHub directory structure ###
-
-~~~
-.
-├── _pages
-|   └── 2007-10-29-some-pages.md
-├── _posts
-|   └── 2009-04-26-some-posts.md
-└── images
-    └── some-images # copy all files (include subdirectory) to wordpress
-~~~
-
-### Importing from GitHub ###
-
-Writing On GitHub is also capable of importing posts directly from GitHub, without creating them in WordPress before hand. In order to have your post imported into GitHub, add this YAML Frontmatter to the top of your .md document:
-
-    ---
-    post_title: 'Post Title'
-    post_name: 'this is post name'
-    post_date: '2018-03-07 15:21:26'
-    layout: post_type_probably_post
-    published: true_or_false
-    author: author_name
-    tags:
-        - tag_a
-        - tag_b
-    categories:
-        - category_a
-        - category_b
-    ---
-    Post goes here.
-
-and fill it out with the data related to the post you're writing. Save the post and commit it directly to the repository. After the post is added to WordPress, an additional commit will be added to the repository, updating the new post with the new information from the database.
-
-Note that Writing On GitHub will import posts from the `master` branch by default. Once set, do not change it.
-
-If Writing On GitHub cannot find the author for a given import, it will fallback to the default user as set on the settings page. **Make sure you set this user before you begin importing posts from GitHub.** Without it set, Writing On GitHub will default to no user being set for the author as well as unknown-author revisions.
-
-
-### Contributing ###
-
-Found a bug? Want to take a stab at [one of the open issues](https://github.com/litefeel/writing-on-github/issues)? We'd love your help!
-
-See [the contributing documentation](CONTRIBUTING.md) for details.
+> **Note:** There is a limitation with at least the Jetpack Markdown plugin. It will export both the markdown and the HTML contents. changes are not reflected properly unless you edit both.
 
 ### Prior Art ###
 
+* [litefeel/writing-on-github](https://github.com/litefeel/writing-on-github)
 * [WordPress Post Forking](https://github.com/post-forking/post-forking)
 * [WordPress to Jekyll exporter](https://github.com/benbalter/wordpress-to-jekyll-exporter)
 * [Writing in public, syncing with GitHub](https://konklone.com/post/writing-in-public-syncing-with-github)
