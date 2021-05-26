@@ -96,6 +96,14 @@ You can export posts through the CLI using this command. Note that a user ID of 
 $ wp wogh export all <user id> --debug
 ```
 
+### Manual Import via CLI
+
+You can import existing posts through the CLI using this command.
+
+```
+ wp wogh import 2
+```
+
 ## Running Tests
 
 TODO
