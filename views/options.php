@@ -1,40 +1,40 @@
 <?php
 /**
  * Options Page View.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 ?>
 <div class="wrap">
-	<h2><?php esc_html_e( 'Writing On GitHub', 'writing-on-github' ); ?></h2>
+	<h2><?php esc_html_e( 'Wordpress-GitHub Sync', 'wordpress-github-sync' ); ?></h2>
 
 	<form method="post" action="options.php">
-		<?php settings_fields( Writing_On_GitHub::$text_domain ); ?>
-		<?php do_settings_sections( Writing_On_GitHub::$text_domain ); ?>
+		<?php settings_fields( Wordpress_GitHub_Sync::$text_domain ); ?>
+		<?php do_settings_sections( Wordpress_GitHub_Sync::$text_domain ); ?>
 		<table class="form-table">
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Webhook callback', 'writing-on-github' ); ?></th>
-				<td><code><?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>?action=wogh_push_request</code></td>
+				<th scope="row"><?php esc_html_e( 'Webhook callback', 'wordpress-github-sync' ); ?></th>
+				<td><code><?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>?action=wghs_push_request</code></td>
 			</tr>
 			<tr>
-                <th scope="row"><?php esc_html_e( 'Export', 'writing-on-github' ); ?></th>
+                <th scope="row"><?php esc_html_e( 'Export', 'wordpress-github-sync' ); ?></th>
                 <td>
                     <p><a href="<?php echo esc_url( add_query_arg( array( 'action' => 'export' ) ) ); ?>">
-                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Export to GitHub', 'writing-on-github' ); ?>" />
+                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Export to GitHub', 'wordpress-github-sync' ); ?>" />
                     </a></p>
                     <p><a href="<?php echo esc_url( add_query_arg( array( 'action' => 'force_export' ) ) ); ?>">
-                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Force export to GitHub', 'writing-on-github' ); ?>" />
+                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Force export to GitHub', 'wordpress-github-sync' ); ?>" />
                     </a></p>
                 </td>
             </tr>
             <tr>
-                <th scope="row"><?php esc_html_e( 'Import', 'writing-on-github' ); ?></th>
+                <th scope="row"><?php esc_html_e( 'Import', 'wordpress-github-sync' ); ?></th>
                 <td>
                     <p><a href="<?php echo esc_url( add_query_arg( array( 'action' => 'import' ) ) ); ?>">
-                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Import from GitHub', 'writing-on-github' ); ?>" />
+                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Import from GitHub', 'wordpress-github-sync' ); ?>" />
                     </a></p>
                      <p><a href="<?php echo esc_url( add_query_arg( array( 'action' => 'force_import' ) ) ); ?>">
-                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Force Import from GitHub', 'writing-on-github' ); ?>" />
+                        <input type="button" class="button button-secondary" value="<?php esc_html_e( 'Force Import from GitHub', 'wordpress-github-sync' ); ?>" />
                     </a></p>
                 </td>
             </tr>

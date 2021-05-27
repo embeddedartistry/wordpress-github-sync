@@ -2,7 +2,7 @@ These notes are preserved from the original research/refactoring effort for post
 
 ## Plugin Tweaks
 
-Likely need to udpate this function to make sure we can recreate the proper path:
+Likely need to update this function to make sure we can recreate the proper path:
 
 ```
 /**
@@ -14,7 +14,7 @@ Likely need to udpate this function to make sure we can recreate the proper path
      */
     public function delete_post_by_path( $path ) {
         $query = new WP_Query( array(
-            'meta_key'       => '_wogh_github_path',
+            'meta_key'       => '_wghs_github_path',
             'meta_value'     => $path,
             'meta_compare'   => '=',
             'posts_per_page' => 1,
@@ -42,7 +42,7 @@ Likely need to udpate this function to make sure we can recreate the proper path
             return new WP_Error(
                 'path_not_found',
                 sprintf(
-                    __( 'Post not found for path %s.', 'writing-on-github' ),
+                    __( 'Post not found for path %s.', 'wordpress-github-sync' ),
                     $path
                 )
             );
@@ -60,7 +60,7 @@ Likely need to udpate this function to make sure we can recreate the proper path
                 return new WP_Error(
                     'db_error',
                     sprintf(
-                        __( 'Failed to delete post ID %d.', 'writing-on-github' ),
+                        __( 'Failed to delete post ID %d.', 'wordpress-github-sync' ),
                         $post_id
                     )
                 );
@@ -68,7 +68,7 @@ Likely need to udpate this function to make sure we can recreate the proper path
         }
 
         return sprintf(
-            __( 'Successfully deleted post ID %d.', 'writing-on-github' ),
+            __( 'Successfully deleted post ID %d.', 'wordpress-github-sync' ),
             $post_id
         );
     }
@@ -95,7 +95,7 @@ Likely need to update this for paths
      */
     public function github_directory() {
         if ( 'publish' !== $this->status() ) {
-            return apply_filters( 'wogh_directory_unpublished', '_drafts/', $this );
+            return apply_filters( 'wghs_directory_unpublished', '_drafts/', $this );
         }
 
         $name = '';
@@ -126,7 +126,7 @@ Likely need to update this for paths
             $name = '_' . $name . '/';
         }
 
-        return apply_filters( 'wogh_directory_published', $name, $this );
+        return apply_filters( 'wghs_directory_published', $name, $this );
     }
 ```
 
@@ -162,7 +162,7 @@ NEED to output to a subdirectory? "website/"
             $filename = $this->get_name() . '.md';
         }
 
-        return apply_filters( 'wogh_filename', $filename, $this );
+        return apply_filters( 'wghs_filename', $filename, $this );
     }
 ```
 
@@ -179,7 +179,7 @@ Separated by days is annoying, so do months?
             $filename = $this->get_name() . '/' $this->get_name() . '.md';
         }
 
-        return apply_filters( 'wogh_filename', $filename, $this );
+        return apply_filters( 'wghs_filename', $filename, $this );
     }
 ```
 
@@ -196,7 +196,7 @@ Let's stick with years, and then we'll put each article and page into its own fo
             $filename = $this->get_name() . '/' $this->get_name() . '.md';
         }
 
-        return apply_filters( 'wogh_filename', $filename, $this );
+        return apply_filters( 'wghs_filename', $filename, $this );
     }
 ```
 
@@ -249,7 +249,7 @@ This function can be modified for directory naming :)
 ```
         public function github_directory() {
         if ( 'publish' !== $this->status() ) {
-            return apply_filters( 'wogh_directory_unpublished', '_drafts/', $this );
+            return apply_filters( 'wghs_directory_unpublished', '_drafts/', $this );
         }
 
         $name = '';

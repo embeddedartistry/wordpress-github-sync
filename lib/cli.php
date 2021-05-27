@@ -1,18 +1,18 @@
 <?php
 /**
  * WP_CLI Commands
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_CLI
+ * Class Wordpress_GitHub_Sync_CLI
  */
-class Writing_On_GitHub_CLI extends WP_CLI_Command {
+class Wordpress_GitHub_Sync_CLI extends WP_CLI_Command {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
@@ -20,7 +20,7 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
      * Grab the Application container on instantiation.
      */
     public function __construct() {
-        $this->app = Writing_On_GitHub::$instance;
+        $this->app = Wordpress_GitHub_Sync::$instance;
     }
 
     /**
@@ -37,8 +37,8 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp wogh export all 1
-     *     wp wogh export 1 1
+     *     wp wghs export all 1
+     *     wp wghs export 1 1
      *
      * @synopsis <post_id|all> <user_id>
      *
@@ -48,13 +48,13 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
         list( $post_id, $user_id ) = $args;
 
         if ( ! is_numeric( $user_id ) ) {
-            WP_CLI::error( __( 'Invalid user ID', 'writing-on-github' ) );
+            WP_CLI::error( __( 'Invalid user ID', 'wordpress-github-sync' ) );
         }
 
 
         if( $user_id == 0 )
         {
-            wp_set_current_user( get_option( 'wogh_default_user' ) );
+            wp_set_current_user( get_option( 'wghs_default_user' ) );
         }
         else
         {
@@ -62,18 +62,18 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
         }
 
         if ( 'all' === $post_id ) {
-            WP_CLI::line( __( 'Starting full export to GitHub.', 'writing-on-github' ) );
+            WP_CLI::line( __( 'Starting full export to GitHub.', 'wordpress-github-sync' ) );
             $this->app->controller()->export_all();
         } elseif ( is_numeric( $post_id ) ) {
             WP_CLI::line(
                 sprintf(
-                    __( 'Exporting post ID to GitHub: %d', 'writing-on-github' ),
+                    __( 'Exporting post ID to GitHub: %d', 'wordpress-github-sync' ),
                     $post_id
                 )
             );
             $this->app->controller()->export_post( (int) $post_id );
         } else {
-            WP_CLI::error( __( 'Invalid post ID', 'writing-on-github' ) );
+            WP_CLI::error( __( 'Invalid post ID', 'wordpress-github-sync' ) );
         }
     }
 
@@ -88,7 +88,7 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp wogh import 1
+     *     wp wghs import 1
      *
      * @synopsis <user_id>
      *
@@ -98,12 +98,12 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
         list( $user_id ) = $args;
 
         if ( ! is_numeric( $user_id ) ) {
-            WP_CLI::error( __( 'Invalid user ID', 'writing-on-github' ) );
+            WP_CLI::error( __( 'Invalid user ID', 'wordpress-github-sync' ) );
         }
 
-        update_option( '_wogh_export_user_id', (int) $user_id );
+        update_option( '_wghs_export_user_id', (int) $user_id );
 
-        WP_CLI::line( __( 'Starting import from GitHub.', 'writing-on-github' ) );
+        WP_CLI::line( __( 'Starting import from GitHub.', 'wordpress-github-sync' ) );
 
         $this->app->controller()->import_master();
     }
@@ -119,8 +119,8 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp wogh prime --branch=master
-     *     wp wogh prime --sha=<commit_sha>
+     *     wp wghs prime --branch=master
+     *     wp wghs prime --sha=<commit_sha>
      *
      * @synopsis [--sha=<commit_sha>] [--branch]
      *
@@ -129,21 +129,21 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
      */
     public function prime( $args, $assoc_args ) {
         if ( isset( $assoc_args['branch'] ) ) {
-            WP_CLI::line( __( 'Starting branch import.', 'writing-on-github' ) );
+            WP_CLI::line( __( 'Starting branch import.', 'wordpress-github-sync' ) );
 
             $commit = $this->app->api()->fetch()->master();
 
             if ( is_wp_error( $commit ) ) {
                 WP_CLI::error(
                     sprintf(
-                        __( 'Failed to import and cache branch with error: %s', 'writing-on-github' ),
+                        __( 'Failed to import and cache branch with error: %s', 'wordpress-github-sync' ),
                         $commit->get_error_message()
                     )
                 );
             } else {
                 WP_CLI::success(
                     sprintf(
-                        __( 'Successfully imported and cached commit %s from branch.', 'writing-on-github' ),
+                        __( 'Successfully imported and cached commit %s from branch.', 'wordpress-github-sync' ),
                         $commit->sha()
                     )
                 );
@@ -155,7 +155,7 @@ class Writing_On_GitHub_CLI extends WP_CLI_Command {
 
             WP_CLI::success(
                 sprintf(
-                    __( 'Successfully imported and cached commit %s.', 'writing-on-github' ),
+                    __( 'Successfully imported and cached commit %s.', 'wordpress-github-sync' ),
                     $commit->sha()
                 )
             );

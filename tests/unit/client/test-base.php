@@ -1,6 +1,6 @@
 <?php
 
-abstract class Writing_On_GitHub_Base_Client_Test extends Writing_On_GitHub_TestCase {
+abstract class Wordpress_GitHub_Sync_Base_Client_Test extends Wordpress_GitHub_Sync_TestCase {
 
     /**
      * @var string
@@ -10,7 +10,7 @@ abstract class Writing_On_GitHub_Base_Client_Test extends Writing_On_GitHub_Test
     /**
      * @var string
      */
-    const REPO_OPTION_VALUE = 'woghtest/wogh-test';
+    const REPO_OPTION_VALUE = 'wghstest/wghs-test';
 
     /**
      * @var string
@@ -36,10 +36,10 @@ abstract class Writing_On_GitHub_Base_Client_Test extends Writing_On_GitHub_Test
         parent::setUp();
 
         WP_HTTP_TestCase::init();
-        update_option( 'wogh_repository', self::REPO_OPTION_VALUE );
-        update_option( 'wogh_oauth_token', self::TOKEN_OPTION_VALUE );
-        update_option( 'wogh_host', self::HOST_OPTION_VALUE );
-        update_option( 'wogh_branch', self::BRANCH_OPTION_VALUE );
+        update_option( 'wghs_repository', self::REPO_OPTION_VALUE );
+        update_option( 'wghs_oauth_token', self::TOKEN_OPTION_VALUE );
+        update_option( 'wghs_host', self::HOST_OPTION_VALUE );
+        update_option( 'wghs_branch', self::BRANCH_OPTION_VALUE );
         $this->http_responder = array( $this, 'mock_github_api' );
     }
 

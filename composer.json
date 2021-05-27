@@ -1,5 +1,5 @@
 {
-  "name": "embeddedartistry/writing-on-github",
+  "name": "embeddedartistry/wordpress-github-sync",
   "description": "A WordPress plugin to support synchronization between Embedded Artistry Wordpress and GitHub.",
   "type": "wordpress-plugin",
   "minimum-stability": "stable",

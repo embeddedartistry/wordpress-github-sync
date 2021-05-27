@@ -3,12 +3,12 @@
 /**
  * @group api
  */
-class Writing_On_GitHub_Persist_Client_Test extends Writing_On_GitHub_Base_Client_Test {
+class Wordpress_GitHub_Sync_Persist_Client_Test extends Wordpress_GitHub_Sync_Base_Client_Test {
 
     public function setUp() {
         parent::setUp();
 
-        $this->persist = new Writing_On_GitHub_Persist_Client( $this->app );
+        $this->persist = new Wordpress_GitHub_Sync_Persist_Client( $this->app );
         // $this->commit
         //  ->shouldReceive( 'tree' )
         //  ->andReturn( $this->tree );
@@ -208,7 +208,7 @@ class Writing_On_GitHub_Persist_Client_Test extends Writing_On_GitHub_Base_Clien
     //          'parents' => array( 'c0d2cb90b51826096c826b61a0e74d2c973d7ad8' )
     //      ) );
     //  $this->set_post_trees( true );
-    //  update_option( '_wogh_export_user_id', $this->factory->user->create( array(
+    //  update_option( '_wghs_export_user_id', $this->factory->user->create( array(
     //      'display_name' => 'James DiGioia',
     //      'user_email'   => 'jamesorodig@gmail.com',
     //  ) ) );

@@ -1,27 +1,27 @@
 <?php
 /**
  * Response management object.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Response
+ * Class Wordpress_GitHub_Sync_Response
  */
-class Writing_On_GitHub_Response {
+class Wordpress_GitHub_Sync_Response {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
     /**
-     * Writing_On_GitHub_Response constructor.
+     * Wordpress_GitHub_Sync_Response constructor.
      *
-     * @param Writing_On_GitHub $app Application container.
+     * @param Wordpress_GitHub_Sync $app Application container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
@@ -90,6 +90,6 @@ class Writing_On_GitHub_Response {
             $msg = $msg->get_error_message();
         }
 
-        Writing_On_GitHub::write_log( $msg );
+        Wordpress_GitHub_Sync::write_log( $msg );
     }
 }

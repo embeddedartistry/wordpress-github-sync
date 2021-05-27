@@ -4,7 +4,7 @@
 /**
  *
  */
-class Writing_On_GitHub_File_Info {
+class Wordpress_GitHub_Sync_File_Info {
 
     public function __construct( stdClass $data ) {
         $this->sha          = $data->sha;

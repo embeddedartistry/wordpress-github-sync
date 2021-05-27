@@ -1,15 +1,15 @@
 <?php
-use Writing_On_GitHub_Base_Client as Base;
+use Wordpress_GitHub_Sync_Base_Client as Base;
 
 /**
  * @group api
  */
-class Writing_On_GitHub_Fetch_Client_Test extends Writing_On_GitHub_Base_Client_Test {
+class Wordpress_GitHub_Sync_Fetch_Client_Test extends Wordpress_GitHub_Sync_Base_Client_Test {
 
     public function setUp() {
         parent::setUp();
 
-        $this->fetch = new Writing_On_GitHub_Fetch_Client( $this->app );
+        $this->fetch = new Wordpress_GitHub_Sync_Fetch_Client( $this->app );
     }
 
     public function test_should_fail_if_missing_token() {
@@ -37,7 +37,7 @@ class Writing_On_GitHub_Fetch_Client_Test extends Writing_On_GitHub_Base_Client_
         $this->set_get_compare( true );
         $infos = $this->fetch->compare( '861f87e8851b8debb78db548269d29f8da4d94ac' );
         $this->assertCount( 1, $infos );
-        $this->assertInstanceOf( 'Writing_On_GitHub_File_Info', $infos[0] );
+        $this->assertInstanceOf( 'Wordpress_GitHub_Sync_File_Info', $infos[0] );
     }
 
     public function test_should_return_files_with_tree() {
@@ -81,7 +81,7 @@ class Writing_On_GitHub_Fetch_Client_Test extends Writing_On_GitHub_Base_Client_
     //              '8d9b2e6fd93761211dc03abd71f4a9189d680fd0',
     //              '2d73165945b0ccbe4932f1363457986b0ed49f19'
     //          ),
-    //          Mockery::type( 'Writing_On_GitHub_Blob' )
+    //          Mockery::type( 'Wordpress_GitHub_Sync_Blob' )
     //      )
     //      ->andReturnUsing( function ( $sha, $blob ) {
     //          return $blob;
@@ -89,19 +89,19 @@ class Writing_On_GitHub_Fetch_Client_Test extends Writing_On_GitHub_Base_Client_
     //  $this->api_cache
     //      ->shouldReceive( 'set_tree' )
     //      ->once()
-    //      ->with( '9108868e3800bec6763e51beb0d33e15036c3626', Mockery::type( 'Writing_On_GitHub_Tree' ) )
+    //      ->with( '9108868e3800bec6763e51beb0d33e15036c3626', Mockery::type( 'Wordpress_GitHub_Sync_Tree' ) )
     //      ->andReturnUsing( function ( $sha, $tree ) {
     //          return $tree;
     //      } );
     //  $this->api_cache
     //      ->shouldReceive( 'set_commit' )
     //      ->once()
-    //      ->with( 'db2510854e6aeab68ead26b48328b19f4bdf926e', Mockery::type( 'Writing_On_GitHub_Commit' ) )
+    //      ->with( 'db2510854e6aeab68ead26b48328b19f4bdf926e', Mockery::type( 'Wordpress_GitHub_Sync_Commit' ) )
     //      ->andReturnUsing( function ( $sha, $commit ) {
     //          return $commit;
     //      } );
 
-    //  $this->assertInstanceOf( 'Writing_On_GitHub_Commit', $master = $this->fetch->master() );
+    //  $this->assertInstanceOf( 'Wordpress_GitHub_Sync_Commit', $master = $this->fetch->master() );
 
     //  /**
     //   * Validate the commit's api data mapped correctly.
@@ -111,11 +111,11 @@ class Writing_On_GitHub_Fetch_Client_Test extends Writing_On_GitHub_Base_Client_
     //  $this->assertSame( '2015-11-02T00:36:54Z', $master->author()->date );
     //  $this->assertSame( 'test@test.com', $master->committer()->email );
     //  $this->assertSame( '2015-11-02T00:36:54Z', $master->committer()->date );
-    //  $this->assertSame( 'Initial full site export - wogh', $master->message() );
+    //  $this->assertSame( 'Initial full site export - wghs', $master->message() );
     //  $this->assertCount( 1, $parents = $master->parents() );
     //  $this->assertSame( 'db2510854e6aeab68ead26b48328b19f4bdf926e', $parents[0]->sha );
 
-    //  $this->assertInstanceOf( 'Writing_On_GitHub_Tree', $tree = $master->tree() );
+    //  $this->assertInstanceOf( 'Wordpress_GitHub_Sync_Tree', $tree = $master->tree() );
 
     //  /**
     //   * Validate the tree's api data mapped correctly.

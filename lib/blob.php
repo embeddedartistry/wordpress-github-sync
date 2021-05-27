@@ -1,13 +1,13 @@
 <?php
 /**
  * API Blob model.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Blob
+ * Class Wordpress_GitHub_Sync_Blob
  */
-class Writing_On_GitHub_Blob {
+class Wordpress_GitHub_Sync_Blob {
 
     /**
      * Complete blob content.
@@ -171,7 +171,7 @@ class Writing_On_GitHub_Blob {
         /**
          * Filters the content for import.
          */
-        return apply_filters( 'wogh_content_import', trim( $content ) );
+        return apply_filters( 'wghs_content_import', trim( $content ) );
     }
 
     /**
@@ -188,7 +188,7 @@ class Writing_On_GitHub_Blob {
             array_pop( $matches );
 
             $meta = spyc_load( $matches[2] );
-            if ( 'yes' == get_option('wogh_ignore_author') ) {
+            if ( 'yes' == get_option('wghs_ignore_author') ) {
                 unset($meta['author']);
             }
         }

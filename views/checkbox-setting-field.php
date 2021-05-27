@@ -1,7 +1,7 @@
 <?php
 /**
  * Test Option Field.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 ?>

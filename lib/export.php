@@ -2,27 +2,27 @@
 /**
  * GitHub Export Manager.
  *
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Export
+ * Class Wordpress_GitHub_Sync_Export
  */
-class Writing_On_GitHub_Export {
+class Wordpress_GitHub_Sync_Export {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
     /**
      * Initializes a new export manager.
      *
-     * @param Writing_On_GitHub $app Application container.
+     * @param Wordpress_GitHub_Sync $app Application container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
@@ -47,7 +47,7 @@ class Writing_On_GitHub_Export {
             $result = $this->update( $post->id() );
             if ( is_wp_error( $result ) ) {
                 /* @var WP_Error $result */
-                $error = wogh_append_error( $error, $result );
+                $error = wghs_append_error( $error, $result );
             }
         }
 
@@ -56,7 +56,7 @@ class Writing_On_GitHub_Export {
             return $error;
         }
 
-        return __( 'Export to GitHub completed successfully.', 'writing-on-github' );
+        return __( 'Export to GitHub completed successfully.', 'wordpress-github-sync' );
     }
 
 
@@ -66,7 +66,7 @@ class Writing_On_GitHub_Export {
      * @return boolean
      */
     protected function github_path( $post_id ) {
-        $github_path = get_post_meta( $post_id, '_wogh_github_path', true );
+        $github_path = get_post_meta( $post_id, '_wghs_github_path', true );
 
         if ( $github_path && $this->app->api()->fetch()->exists( $github_path ) ) {
             return $github_path;
@@ -105,18 +105,18 @@ class Writing_On_GitHub_Export {
             return $result;
         }
 
-        return __( 'Export to GitHub completed successfully.', 'writing-on-github' );
+        return __( 'Export to GitHub completed successfully.', 'wordpress-github-sync' );
     }
 
     /**
      * Post to blob
-     * @param  Writing_On_GitHub_Post $post
-     * @return WP_Error|Writing_On_GitHub_Blob
+     * @param  Wordpress_GitHub_Sync_Post $post
+     * @return WP_Error|Wordpress_GitHub_Sync_Blob
      */
-    protected function post_to_blob( Writing_On_GitHub_Post $post ) {
+    protected function post_to_blob( Wordpress_GitHub_Sync_Post $post ) {
         if ( ! $post->get_blob()
             && $post->old_github_path()
-            && wogh_is_dont_export_content() ) {
+            && wghs_is_dont_export_content() ) {
 
 
             $blob = $this->app->api()->fetch()->blob_by_path( $post->old_github_path() );
@@ -134,10 +134,10 @@ class Writing_On_GitHub_Export {
 
     /**
      * Export post to github
-     * @param  Writing_On_GitHub_Post $post
+     * @param  Wordpress_GitHub_Sync_Post $post
      * @return WP_Error|true
      */
-    public function export_post( Writing_On_GitHub_Post $post ) {
+    public function export_post( Wordpress_GitHub_Sync_Post $post ) {
         // check blob
         $blob = $this->post_to_blob( $post );
         if ( is_wp_error( $blob ) ) {
@@ -154,7 +154,7 @@ class Writing_On_GitHub_Export {
         if ( $old_github_path && $old_github_path != $github_path ) {
             // rename
             $message = apply_filters(
-                'wogh_commit_msg_move_post',
+                'wghs_commit_msg_move_post',
                 sprintf(
                     'Move %s to %s via %s (two part commit)',
                     $old_github_path, $github_path,
@@ -174,7 +174,7 @@ class Writing_On_GitHub_Export {
         } elseif ( ! $old_github_path ) {
             // create new
             $message = apply_filters(
-                'wogh_commit_msg_new_post',
+                'wghs_commit_msg_new_post',
                 sprintf(
                     'Create %s from %s',
                     $github_path,
@@ -187,13 +187,13 @@ class Writing_On_GitHub_Export {
             }
         } elseif ( $old_github_path && $old_github_path == $github_path ) {
             // update
-            $sha = wogh_git_sha( $blob->content() );
+            $sha = wghs_git_sha( $blob->content() );
             if ( $sha === $blob->sha() ) {
                 // don't export when has not changed
                 return true;
             }
             $message = apply_filters(
-                'wogh_commit_msg_update_post',
+                'wghs_commit_msg_update_post',
                 sprintf(
                     'Update %s from %s',
                     $github_path,
@@ -228,10 +228,10 @@ class Writing_On_GitHub_Export {
             return $post;
         }
 
-        $github_path = get_post_meta( $post_id, '_wogh_github_path', true );
+        $github_path = get_post_meta( $post_id, '_wghs_github_path', true );
 
         $message = apply_filters(
-            'wogh_commit_msg_delete',
+            'wghs_commit_msg_delete',
             sprintf(
                 'Deleting %s via %s',
                 $github_path,
@@ -247,7 +247,7 @@ class Writing_On_GitHub_Export {
             return $result;
         }
 
-        return __( 'Export to GitHub completed successfully.', 'writing-on-github' );
+        return __( 'Export to GitHub completed successfully.', 'wordpress-github-sync' );
     }
 
     /**
@@ -256,10 +256,10 @@ class Writing_On_GitHub_Export {
      * @return string
      */
     protected function get_commit_msg_tag() {
-        $tag = apply_filters( 'wogh_commit_msg_tag', 'wogh' );
+        $tag = apply_filters( 'wghs_commit_msg_tag', 'wghs' );
 
         if ( ! $tag ) {
-            throw new Exception( __( 'Commit message tag not set. Filter `wogh_commit_msg_tag` misconfigured.', 'writing-on-github' ) );
+            throw new Exception( __( 'Commit message tag not set. Filter `wghs_commit_msg_tag` misconfigured.', 'wordpress-github-sync' ) );
         }
 
         return ' - ' . $tag;

@@ -2,37 +2,37 @@
 /**
  * GitHub Import Manager
  *
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Import
+ * Class Wordpress_GitHub_Sync_Import
  */
-class Writing_On_GitHub_Import {
+class Wordpress_GitHub_Sync_Import {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
     /**
      * Initializes a new import manager.
      *
-     * @param Writing_On_GitHub $app Application container.
+     * @param Wordpress_GitHub_Sync $app Application container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
     /**
      * Imports a payload.
-     * @param  Writing_On_GitHub_Payload $payload
+     * @param  Wordpress_GitHub_Sync_Payload $payload
      *
      * @return string|WP_Error
      */
-    public function payload( Writing_On_GitHub_Payload $payload ) {
+    public function payload( Wordpress_GitHub_Sync_Payload $payload ) {
 
         $result = $this->app->api()->fetch()->compare( $payload->get_before_commit_id() );
 
@@ -49,12 +49,12 @@ class Writing_On_GitHub_Import {
             return $result;
         }
 
-        return __( 'Payload processed', 'writing-on-github' );
+        return __( 'Payload processed', 'wordpress-github-sync' );
     }
 
     /**
      * import blob by files
-     * @param  Writing_On_GitHub_File_Info[] $files
+     * @param  Wordpress_GitHub_Sync_File_Info[] $files
      * @param  boolean $force
      *
      * @return true|WP_Error
@@ -70,7 +70,7 @@ class Writing_On_GitHub_Import {
 
             $blob = $this->app->api()->fetch()->blob( $file );
             // network error ?
-            if ( ! $blob instanceof Writing_On_GitHub_Blob ) {
+            if ( ! $blob instanceof Wordpress_GitHub_Sync_Blob ) {
                 continue;
             }
 
@@ -88,7 +88,7 @@ class Writing_On_GitHub_Import {
 
             if ( is_wp_error( $result ) ) {
                 /* @var WP_Error $result */
-                $error = wogh_append_error( $error, $result );
+                $error = wghs_append_error( $error, $result );
             }
         }
 
@@ -120,17 +120,17 @@ class Writing_On_GitHub_Import {
             return $result;
         }
 
-        return __( 'Payload processed', 'writing-on-github' );
+        return __( 'Payload processed', 'wordpress-github-sync' );
     }
 
     /**
      * Checks whether the provided blob should be imported.
      *
-     * @param Writing_On_GitHub_File_Info $file
+     * @param Wordpress_GitHub_Sync_File_Info $file
      *
      * @return bool
      */
-    protected function importable_file( Writing_On_GitHub_File_Info $file ) {
+    protected function importable_file( Wordpress_GitHub_Sync_File_Info $file ) {
 
         $path = $file->path;
         $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/');
@@ -145,11 +145,11 @@ class Writing_On_GitHub_Import {
     /**
      * Checks whether the provided blob should be imported.
      *
-     * @param Writing_On_GitHub_Blob $blob Blob to validate.
+     * @param Wordpress_GitHub_Sync_Blob $blob Blob to validate.
      *
      * @return bool
      */
-    protected function importable_post( Writing_On_GitHub_Blob $blob ) {
+    protected function importable_post( Wordpress_GitHub_Sync_Blob $blob ) {
         // global $wpdb;
 
         // // Skip the repo's readme.
@@ -171,14 +171,14 @@ class Writing_On_GitHub_Import {
 
     /**
      * Imports a post into wordpress
-     * @param  Writing_On_GitHub_Blob $blob
+     * @param  Wordpress_GitHub_Sync_Blob $blob
      * @param  boolean                $force
      * @return WP_Error|bool
      */
-    protected function import_post( Writing_On_GitHub_Blob $blob, $force = false ) {
+    protected function import_post( Wordpress_GitHub_Sync_Blob $blob, $force = false ) {
         $post = $this->blob_to_post( $blob, $force );
 
-        if ( ! $post instanceof Writing_On_GitHub_Post ) {
+        if ( ! $post instanceof Wordpress_GitHub_Sync_Post ) {
             return false;
         }
 
@@ -189,8 +189,8 @@ class Writing_On_GitHub_Import {
         }
 
         if ( $post->is_new() ||
-                ! wogh_equal_path( $post, $blob ) ||
-                ! wogh_equal_front_matter( $post, $blob ) ) {
+                ! wghs_equal_path( $post, $blob ) ||
+                ! wghs_equal_front_matter( $post, $blob ) ) {
 
             $result = $this->app->export()->export_post( $post );
 
@@ -207,10 +207,10 @@ class Writing_On_GitHub_Import {
 
     /**
      * import raw file
-     * @param  Writing_On_GitHub_Blob $blob
+     * @param  Wordpress_GitHub_Sync_Blob $blob
      * @return bool
      */
-    protected function importable_raw_file( Writing_On_GitHub_Blob $blob ) {
+    protected function importable_raw_file( Wordpress_GitHub_Sync_Blob $blob ) {
         if ( $blob->has_frontmatter() ) {
             return false;
         }
@@ -220,12 +220,12 @@ class Writing_On_GitHub_Import {
 
     /**
      * Imports a raw file content into file system.
-     * @param  Writing_On_GitHub_Blob $blob
+     * @param  Wordpress_GitHub_Sync_Blob $blob
      * @param  bool                   $is_remove
      */
-    protected function import_raw_file( Writing_On_GitHub_Blob $blob, $is_remove ) {
+    protected function import_raw_file( Wordpress_GitHub_Sync_Blob $blob, $is_remove ) {
         $arr = wp_upload_dir();
-        $path = $arr['basedir'] . '/writing-on-github/' . $blob->path();
+        $path = $arr['basedir'] . '/wordpress-github-sync/' . $blob->path();
         if ( $is_remove ) {
             if ( file_exists($path) ) {
                 unlink($path);
@@ -244,12 +244,12 @@ class Writing_On_GitHub_Import {
     /**
      * Imports a single blob content into matching post.
      *
-     * @param Writing_On_GitHub_Blob $blob Blob to transform into a Post.
+     * @param Wordpress_GitHub_Sync_Blob $blob Blob to transform into a Post.
      * @param boolean                $force
      *
-     * @return Writing_On_GitHub_Post|false
+     * @return Wordpress_GitHub_Sync_Post|false
      */
-    protected function blob_to_post( Writing_On_GitHub_Blob $blob, $force = false ) {
+    protected function blob_to_post( Wordpress_GitHub_Sync_Blob $blob, $force = false ) {
         $args = array( 'post_content' => $blob->content_import() );
         $meta = $blob->meta();
 
@@ -292,20 +292,20 @@ class Writing_On_GitHub_Import {
             }
         }
 
-        $meta['_wogh_sha'] = $blob->sha();
+        $meta['_wghs_sha'] = $blob->sha();
 
         if ( ! $force && $id ) {
-            $old_sha = get_post_meta( $id, '_wogh_sha', true );
-            $old_github_path = get_post_meta( $id, '_wogh_github_path', true );
+            $old_sha = get_post_meta( $id, '_wghs_sha', true );
+            $old_github_path = get_post_meta( $id, '_wghs_github_path', true );
 
             // dont save post when has same sha
-            if ( $old_sha  && $old_sha == $meta['_wogh_sha'] &&
+            if ( $old_sha  && $old_sha == $meta['_wghs_sha'] &&
                  $old_github_path && $old_github_path == $blob->path() ) {
                 return false;
             }
         }
 
-        $post = new Writing_On_GitHub_Post( $args, $this->app->api() );
+        $post = new Wordpress_GitHub_Sync_Post( $args, $this->app->api() );
         $post->set_old_github_path( $blob->path() );
         $post->set_meta( $meta );
         $post->set_blob( $blob );

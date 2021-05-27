@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Writing on GitHub
- * Plugin URI: https://github.com/embeddedartistry/writing-on-github
+ * Plugin Name: Wordpress GitHub Sync
+ * Plugin URI: https://github.com/embeddedartistry/wordpress-github-sync
  * Description: A WordPress plugin to allow you writing on GitHub (or Jekyll site).
  * Version: 1.2
  * Author:  Embedded Artistry
  * Author URI: https://embeddedartistry.com
  * License: GPLv2
- * Text Domain: writing-on-github
+ * Text Domain: wordpress-github-sync
  */
 
 // If the functions have already been autoloaded, don't reload.
@@ -17,9 +17,9 @@ if ( file_exists( $path ) ) {
     require_once( $path );
 }
 
-add_action( 'plugins_loaded', array( new Writing_On_GitHub, 'boot' ) );
+add_action( 'plugins_loaded', array( new Wordpress_GitHub_Sync, 'boot' ) );
 
-class Writing_On_GitHub {
+class Wordpress_GitHub_Sync {
 
     /**
      * Object instance
@@ -31,73 +31,73 @@ class Writing_On_GitHub {
      * Language text domain
      * @var string
      */
-    public static $text_domain = 'writing-on-github';
+    public static $text_domain = 'wordpress-github-sync';
 
     /**
      * Controller object
-     * @var Writing_On_GitHub_Controller
+     * @var Wordpress_GitHub_Sync_Controller
      */
     public $controller;
 
     /**
      * Controller object
-     * @var Writing_On_GitHub_Admin
+     * @var Wordpress_GitHub_Sync_Admin
      */
     public $admin;
 
     /**
      * CLI object.
      *
-     * @var Writing_On_GitHub_CLI
+     * @var Wordpress_GitHub_Sync_CLI
      */
     protected $cli;
 
     /**
      * Request object.
      *
-     * @var Writing_On_GitHub_Request
+     * @var Wordpress_GitHub_Sync_Request
      */
     protected $request;
 
     /**
      * Response object.
      *
-     * @var Writing_On_GitHub_Response
+     * @var Wordpress_GitHub_Sync_Response
      */
     protected $response;
 
     /**
      * Api object.
      *
-     * @var Writing_On_GitHub_Api
+     * @var Wordpress_GitHub_Sync_Api
      */
     protected $api;
 
     /**
      * Import object.
      *
-     * @var Writing_On_GitHub_Import
+     * @var Wordpress_GitHub_Sync_Import
      */
     protected $import;
 
     /**
      * Export object.
      *
-     * @var Writing_On_GitHub_Export
+     * @var Wordpress_GitHub_Sync_Export
      */
     protected $export;
 
     /**
      * Semaphore object.
      *
-     * @var Writing_On_GitHub_Semaphore
+     * @var Wordpress_GitHub_Sync_Semaphore
      */
     protected $semaphore;
 
     /**
      * Database object.
      *
-     * @var Writing_On_GitHub_Database
+     * @var Wordpress_GitHub_Sync_Database
      */
     protected $database;
 
@@ -108,13 +108,13 @@ class Writing_On_GitHub {
         self::$instance = $this;
 
         if ( is_admin() ) {
-            $this->admin = new Writing_On_GitHub_Admin( plugin_basename( __FILE__ ) );
+            $this->admin = new Wordpress_GitHub_Sync_Admin( plugin_basename( __FILE__ ) );
         }
 
-        $this->controller = new Writing_On_GitHub_Controller( $this );
+        $this->controller = new Wordpress_GitHub_Sync_Controller( $this );
 
         if ( defined( 'WP_CLI' ) && WP_CLI ) {
-            WP_CLI::add_command( 'wogh', $this->cli() );
+            WP_CLI::add_command( 'wghs', $this->cli() );
         }
     }
 
@@ -130,24 +130,24 @@ class Writing_On_GitHub {
         // Controller actions.
         add_action( 'save_post', array( $this->controller, 'export_post' ) );
         add_action( 'delete_post', array( $this->controller, 'delete_post' ) );
-        add_action( 'wp_ajax_nopriv_wogh_push_request', array( $this->controller, 'pull_posts' ) );
-        add_action( 'wogh_export', array( $this->controller, 'export_all' ), 10, 2 );
-        add_action( 'wogh_import', array( $this->controller, 'import_master' ), 10, 2 );
+        add_action( 'wp_ajax_nopriv_wghs_push_request', array( $this->controller, 'pull_posts' ) );
+        add_action( 'wghs_export', array( $this->controller, 'export_all' ), 10, 2 );
+        add_action( 'wghs_import', array( $this->controller, 'import_master' ), 10, 2 );
         // Uncomment below to enable the "edit" button going to GitHub. I don't want it right now.
         // The reason being the Wordpress view gives me the control I need for things like
         // field atlas, courses, tooltips, etc.
         //add_filter( 'get_edit_post_link', array( $this, 'edit_post_link' ), 10, 3 );
 
-        // add_filter( 'wogh_post_meta', array( $this, 'ignore_post_meta' ), 10, 1 );
-        // add_filter( 'wogh_pre_import_meta', array( $this, 'ignore_post_meta' ), 10, 1 );
+        // add_filter( 'wghs_post_meta', array( $this, 'ignore_post_meta' ), 10, 1 );
+        // add_filter( 'wghs_pre_import_meta', array( $this, 'ignore_post_meta' ), 10, 1 );
         add_filter( 'the_content', array( $this, 'the_content' ) );
 
-        do_action( 'wogh_boot', $this );
+        do_action( 'wghs_boot', $this );
     }
 
     public function edit_post_link($link, $postID, $context) {
         if ( ! wp_is_post_revision( $postID ) ) {
-            $post = new Writing_On_GitHub_Post( $postID, Writing_On_GitHub::$instance->api() );
+            $post = new Wordpress_GitHub_Sync_Post( $postID, Wordpress_GitHub_Sync::$instance->api() );
             if ( $post->is_on_github() ) {
                 return $post->github_edit_url();
             }
@@ -157,7 +157,7 @@ class Writing_On_GitHub {
     }
 
     public function ignore_post_meta($meta) {
-        $ignore_meta_keys = get_option('wogh_ignore_metas');
+        $ignore_meta_keys = get_option('wghs_ignore_metas');
         if (empty($ignore_meta_keys)) {
             return $meta;
         }
@@ -181,8 +181,8 @@ class Writing_On_GitHub {
 
     public function the_content($content) {
         $arr = wp_upload_dir();
-        $baseurl = $arr['baseurl'] . '/writing-on-github';
-        $basedir = $arr['basedir'] . '/writing-on-github';
+        $baseurl = $arr['baseurl'] . '/wordpress-github-sync';
+        $basedir = $arr['basedir'] . '/wordpress-github-sync';
 
         $content = preg_replace_callback(
             '/(<img [^>]*?src=[\'"])\S*?(\/images\/\S+)([\'"].*?>)/',
@@ -235,8 +235,8 @@ class Writing_On_GitHub {
      * Enables the admin notice on initial activation
      */
     public function activate() {
-        if ( 'yes' !== get_option( '_wogh_fully_exported' ) ) {
-            set_transient( '_wogh_activated', 'yes' );
+        if ( 'yes' !== get_option( '_wghs_fully_exported' ) ) {
+            set_transient( '_wghs_activated', 'yes' );
         }
     }
 
@@ -244,17 +244,17 @@ class Writing_On_GitHub {
      * Displays the activation admin notice
      */
     public function activation_notice() {
-        if ( ! get_transient( '_wogh_activated' ) ) {
+        if ( ! get_transient( '_wghs_activated' ) ) {
             return;
         }
 
-        delete_transient( '_wogh_activated' );
+        delete_transient( '_wghs_activated' );
 
         ?><div class="updated">
             <p>
                 <?php
                     printf(
-                        __( 'To set up your site to sync with GitHub, update your <a href="%s">settings</a> and click "Export to GitHub."', 'writing-on-github' ),
+                        __( 'To set up your site to sync with GitHub, update your <a href="%s">settings</a> and click "Export to GitHub."', 'wordpress-github-sync' ),
                         admin_url( 'options-general.php?page=' . static::$text_domain)
                     );
                 ?>
@@ -265,7 +265,7 @@ class Writing_On_GitHub {
     /**
      * Get the Controller object.
      *
-     * @return Writing_On_GitHub_Controller
+     * @return Wordpress_GitHub_Sync_Controller
      */
     public function controller() {
         return $this->controller;
@@ -274,11 +274,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the CLI object.
      *
-     * @return Writing_On_GitHub_CLI
+     * @return Wordpress_GitHub_Sync_CLI
      */
     public function cli() {
         if ( ! $this->cli ) {
-            $this->cli = new Writing_On_GitHub_CLI;
+            $this->cli = new Wordpress_GitHub_Sync_CLI;
         }
 
         return $this->cli;
@@ -287,11 +287,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Request object.
      *
-     * @return Writing_On_GitHub_Request
+     * @return Wordpress_GitHub_Sync_Request
      */
     public function request() {
         if ( ! $this->request ) {
-            $this->request = new Writing_On_GitHub_Request( $this );
+            $this->request = new Wordpress_GitHub_Sync_Request( $this );
         }
 
         return $this->request;
@@ -300,11 +300,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Response object.
      *
-     * @return Writing_On_GitHub_Response
+     * @return Wordpress_GitHub_Sync_Response
      */
     public function response() {
         if ( ! $this->response ) {
-            $this->response = new Writing_On_GitHub_Response( $this );
+            $this->response = new Wordpress_GitHub_Sync_Response( $this );
         }
 
         return $this->response;
@@ -313,11 +313,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Api object.
      *
-     * @return Writing_On_GitHub_Api
+     * @return Wordpress_GitHub_Sync_Api
      */
     public function api() {
         if ( ! $this->api ) {
-            $this->api = new Writing_On_GitHub_Api( $this );
+            $this->api = new Wordpress_GitHub_Sync_Api( $this );
         }
 
         return $this->api;
@@ -326,11 +326,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Import object.
      *
-     * @return Writing_On_GitHub_Import
+     * @return Wordpress_GitHub_Sync_Import
      */
     public function import() {
         if ( ! $this->import ) {
-            $this->import = new Writing_On_GitHub_Import( $this );
+            $this->import = new Wordpress_GitHub_Sync_Import( $this );
         }
 
         return $this->import;
@@ -339,11 +339,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Export object.
      *
-     * @return Writing_On_GitHub_Export
+     * @return Wordpress_GitHub_Sync_Export
      */
     public function export() {
         if ( ! $this->export ) {
-            $this->export = new Writing_On_GitHub_Export( $this );
+            $this->export = new Wordpress_GitHub_Sync_Export( $this );
         }
 
         return $this->export;
@@ -352,11 +352,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Semaphore object.
      *
-     * @return Writing_On_GitHub_Semaphore
+     * @return Wordpress_GitHub_Sync_Semaphore
      */
     public function semaphore() {
         if ( ! $this->semaphore ) {
-            $this->semaphore = new Writing_On_GitHub_Semaphore;
+            $this->semaphore = new Wordpress_GitHub_Sync_Semaphore;
         }
 
         return $this->semaphore;
@@ -365,11 +365,11 @@ class Writing_On_GitHub {
     /**
      * Lazy-load the Database object.
      *
-     * @return Writing_On_GitHub_Database
+     * @return Wordpress_GitHub_Sync_Database
      */
     public function database() {
         if ( ! $this->database ) {
-            $this->database = new Writing_On_GitHub_Database( $this );
+            $this->database = new Wordpress_GitHub_Sync_Database( $this );
         }
 
         return $this->database;
@@ -406,9 +406,9 @@ class Writing_On_GitHub {
      * @param string $type
      */
     protected function start_cron( $type, $force = false ) {
-        update_option( '_wogh_' . $type . '_started', 'yes' );
+        update_option( '_wghs_' . $type . '_started', 'yes' );
         $user_id = get_current_user_id();
-        wp_schedule_single_event( time(), 'wogh_' . $type . '', array( $user_id, $force ) );
+        wp_schedule_single_event( time(), 'wghs_' . $type . '', array( $user_id, $force ) );
         spawn_cron();
     }
 }

@@ -15,8 +15,8 @@ define( 'WRITING_ON_GITHUB_TEST', true );
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-    require dirname( __FILE__ ) . '/../../writing-on-github.php';
-    remove_action( 'plugins_loaded', array( Writing_On_GitHub::$instance, 'boot' ) );
+    require dirname( __FILE__ ) . '/../../wordpress-github-sync.php';
+    remove_action( 'plugins_loaded', array( Wordpress_GitHub_Sync::$instance, 'boot' ) );
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 // Start up the WP testing environment.

@@ -1,18 +1,18 @@
 <?php
 /**
  * Database interface.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Database
+ * Class Wordpress_GitHub_Sync_Database
  */
-class Writing_On_GitHub_Database {
+class Wordpress_GitHub_Sync_Database {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
@@ -41,9 +41,9 @@ class Writing_On_GitHub_Database {
     /**
      * Instantiates a new Database object.
      *
-     * @param Writing_On_GitHub $app Application container.
+     * @param Wordpress_GitHub_Sync $app Application container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
@@ -52,7 +52,7 @@ class Writing_On_GitHub_Database {
      *
      * @param  bool $force
      *
-     * @return Writing_On_GitHub_Post[]|WP_Error
+     * @return Wordpress_GitHub_Sync_Post[]|WP_Error
      */
     public function fetch_all_supported( $force = false ) {
         $args  = array(
@@ -62,25 +62,25 @@ class Writing_On_GitHub_Database {
             'fields'      => 'ids',
         );
 
-        $query = new WP_Query( apply_filters( 'wogh_pre_fetch_all_supported', $args ) );
+        $query = new WP_Query( apply_filters( 'wghs_pre_fetch_all_supported', $args ) );
 
         $post_ids = $query->get_posts();
 
         if ( ! $post_ids ) {
             return new WP_Error(
                 'no_results',
-                __( 'Querying for supported posts returned no results.', 'writing-on-github' )
+                __( 'Querying for supported posts returned no results.', 'wordpress-github-sync' )
             );
         }
 
-        /* @var Writing_On_GitHub_Post[] $results */
+        /* @var Wordpress_GitHub_Sync_Post[] $results */
         $results = array();
         foreach ( $post_ids as $post_id ) {
             // Do not export posts that have already been exported
-            if ( $force || ! get_post_meta( $post_id, '_wogh_sha', true ) ||
-                 ! get_post_meta( $post_id, '_wogh_github_path', true ) ) {
+            if ( $force || ! get_post_meta( $post_id, '_wghs_sha', true ) ||
+                 ! get_post_meta( $post_id, '_wghs_github_path', true ) ) {
 
-                $results[] = new Writing_On_GitHub_Post( $post_id, $this->app->api() );
+                $results[] = new Wordpress_GitHub_Sync_Post( $post_id, $this->app->api() );
             }
         }
 
@@ -92,10 +92,10 @@ class Writing_On_GitHub_Database {
      *
      * @param int $post_id Post ID to fetch.
      *
-     * @return WP_Error|Writing_On_GitHub_Post
+     * @return WP_Error|Wordpress_GitHub_Sync_Post
      */
     public function fetch_by_id( $post_id ) {
-        $post = new Writing_On_GitHub_Post( $post_id, $this->app->api() );
+        $post = new Wordpress_GitHub_Sync_Post( $post_id, $this->app->api() );
 
         if ( ! $this->is_post_supported( $post ) ) {
             return new WP_Error(
@@ -103,7 +103,7 @@ class Writing_On_GitHub_Database {
                 sprintf(
                     __(
                         'Post ID %s (name %s) is not supported at this time.',
-                        'writing-on-github'
+                        'wordpress-github-sync'
                     ),
                     $post_id,
                     get_the_title($post_id)
@@ -118,11 +118,11 @@ class Writing_On_GitHub_Database {
      * Save an post to database
      * and associates their author as well as their latest
      *
-     * @param  Writing_On_GitHub_Post $post [description]
+     * @param  Wordpress_GitHub_Sync_Post $post [description]
      * @return WP_Error|true
      */
-    public function save_post( Writing_On_GitHub_Post $post ) {
-        $args = apply_filters( 'wogh_pre_import_args', $this->post_args( $post ), $post );
+    public function save_post( Wordpress_GitHub_Sync_Post $post ) {
+        $args = apply_filters( 'wghs_pre_import_args', $this->post_args( $post ), $post );
 
         if ( $post->is_new() ) {
             error_log('This plugin does not support adding posts from GitHub. Please initially create content with the Wordpress front-end.');
@@ -140,9 +140,9 @@ class Writing_On_GitHub_Database {
 
         $post->set_post( get_post( $post_id ) );
 
-        $meta = apply_filters( 'wogh_pre_import_meta', $post->get_meta(), $post );
+        $meta = apply_filters( 'wghs_pre_import_meta', $post->get_meta(), $post );
 
-        update_post_meta( $post_id, '_wogh_sha', $meta['_wogh_sha'] );
+        update_post_meta( $post_id, '_wghs_sha', $meta['_wghs_sha'] );
 
         return true;
     }
@@ -222,7 +222,7 @@ class Writing_On_GitHub_Database {
      * @return array
      */
     protected function get_whitelisted_post_types() {
-        return apply_filters( 'wogh_whitelisted_post_types', $this->whitelisted_post_types );
+        return apply_filters( 'wghs_whitelisted_post_types', $this->whitelisted_post_types );
     }
 
     /**
@@ -231,7 +231,7 @@ class Writing_On_GitHub_Database {
      * @return array
      */
     protected function get_whitelisted_post_statuses() {
-        return apply_filters( 'wogh_whitelisted_post_statuses', $this->whitelisted_post_statuses );
+        return apply_filters( 'wghs_whitelisted_post_statuses', $this->whitelisted_post_statuses );
     }
 
     /**
@@ -253,11 +253,11 @@ class Writing_On_GitHub_Database {
      * Verifies that both the post's status & type
      * are currently whitelisted
      *
-     * @param  Writing_On_GitHub_Post $post Post to verify.
+     * @param  Wordpress_GitHub_Sync_Post $post Post to verify.
      *
      * @return boolean                          True if supported, false if not.
      */
-    protected function is_post_supported( Writing_On_GitHub_Post $post ) {
+    protected function is_post_supported( Wordpress_GitHub_Sync_Post $post ) {
         if ( wp_is_post_revision( $post->id ) ) {
             error_log(sprintf(__('Post ID %d is not post revision'), $post->id));
             return false;
@@ -279,7 +279,7 @@ class Writing_On_GitHub_Database {
             return false;
         }
 
-        return apply_filters( 'wogh_is_post_supported', true, $post );
+        return apply_filters( 'wghs_is_post_supported', true, $post );
     }
 
     /**
@@ -313,14 +313,14 @@ class Writing_On_GitHub_Database {
 
         if ( ! $user ) {
             // Use the default user.
-            $user = get_user_by( 'id', (int) get_option( 'wogh_default_user' ) );
+            $user = get_user_by( 'id', (int) get_option( 'wghs_default_user' ) );
         }
 
         if ( ! $user ) {
             return new WP_Error(
                 'user_not_found',
                 sprintf(
-                    __( 'Commit user not found for email %s', 'writing-on-github' ),
+                    __( 'Commit user not found for email %s', 'wordpress-github-sync' ),
                     $email
                 )
             );
@@ -393,7 +393,7 @@ class Writing_On_GitHub_Database {
 
         if ( 0 === $result ) {
             return sprintf(
-                __( 'No change for post ID %d.', 'writing-on-github' ),
+                __( 'No change for post ID %d.', 'wordpress-github-sync' ),
                 $post_id
             );
         }
@@ -401,7 +401,7 @@ class Writing_On_GitHub_Database {
         clean_post_cache( $post_id );
 
         return sprintf(
-            __( 'Successfully updated post ID %d.', 'writing-on-github' ),
+            __( 'Successfully updated post ID %d.', 'wordpress-github-sync' ),
             $post_id
         );
     }
@@ -409,12 +409,12 @@ class Writing_On_GitHub_Database {
     // *
     //  * Update the provided post's blob sha.
     //  *
-    //  * @param Writing_On_GitHub_Post $post Post to update.
+    //  * @param Wordpress_GitHub_Sync_Post $post Post to update.
     //  * @param string                     $sha Sha to update to.
     //  *
     //  * @return bool|int
 
     // public function set_post_sha( $post, $sha ) {
-    //  return update_post_meta( $post->id, '_wogh_sha', $sha );
+    //  return update_post_meta( $post->id, '_wghs_sha', $sha );
     // }
 }

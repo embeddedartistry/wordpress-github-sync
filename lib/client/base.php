@@ -1,32 +1,32 @@
 <?php
 /**
  * Base API client class.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Base_Client
+ * Class Wordpress_GitHub_Sync_Base_Client
  */
-class Writing_On_GitHub_Base_Client {
+class Wordpress_GitHub_Sync_Base_Client {
 
-    const HOST_OPTION_KEY   = 'wogh_host';
-    const TOKEN_OPTION_KEY  = 'wogh_oauth_token';
-    const REPO_OPTION_KEY   = 'wogh_repository';
-    const BRANCH_OPTION_KEY = 'wogh_branch';
+    const HOST_OPTION_KEY   = 'wghs_host';
+    const TOKEN_OPTION_KEY  = 'wghs_oauth_token';
+    const REPO_OPTION_KEY   = 'wghs_repository';
+    const BRANCH_OPTION_KEY = 'wghs_branch';
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
     /**
      * Instantiates a new Api object.
      *
-     * @param Writing_On_GitHub $app Application container.
+     * @param Wordpress_GitHub_Sync $app Application container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
@@ -64,7 +64,7 @@ class Writing_On_GitHub_Base_Client {
             return new WP_Error(
                 strtolower( str_replace( ' ', '_', $status ) ),
                 sprintf(
-                    __( 'Method %s to endpoint %s failed with error: %s; status: %d', 'writing-on-github' ),
+                    __( 'Method %s to endpoint %s failed with error: %s; status: %d', 'wordpress-github-sync' ),
                     $method,
                     $endpoint,
                     ( $body && isset($body->message) ) ? $body->message : 'Unknown error',
@@ -85,7 +85,7 @@ class Writing_On_GitHub_Base_Client {
         if ( ! $this->oauth_token() ) {
             return new WP_Error(
                 'missing_token',
-                __( 'Writing On GitHub needs an auth token. Please update your settings.', 'writing-on-github' )
+                __( 'Wordpress-GitHub Sync needs an auth token. Please update your settings.', 'wordpress-github-sync' )
             );
         }
 
@@ -94,7 +94,7 @@ class Writing_On_GitHub_Base_Client {
         if ( ! $repo ) {
             return new WP_Error(
                 'missing_repository',
-                __( 'Writing On GitHub needs a repository. Please update your settings.', 'writing-on-github' )
+                __( 'Wordpress-GitHub Sync needs a repository. Please update your settings.', 'wordpress-github-sync' )
             );
         }
 
@@ -103,7 +103,7 @@ class Writing_On_GitHub_Base_Client {
         if ( 2 !== count( $parts ) ) {
             return new WP_Error(
                 'malformed_repository',
-                __( 'Writing On GitHub needs a properly formed repository. Please update your settings.', 'writing-on-github' )
+                __( 'Wordpress-GitHub Sync needs a properly formed repository. Please update your settings.', 'wordpress-github-sync' )
             );
         }
 

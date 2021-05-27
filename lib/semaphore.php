@@ -1,18 +1,18 @@
 <?php
 /**
  * Locks and unlock the import/export process.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Semaphore
+ * Class Wordpress_GitHub_Sync_Semaphore
  */
-class Writing_On_GitHub_Semaphore {
+class Wordpress_GitHub_Sync_Semaphore {
 
     /**
      * Sempahore's option key.
      */
-    const KEY = 'wogh_semaphore_lock';
+    const KEY = 'wghs_semaphore_lock';
 
     /**
      * Option key when semaphore is locked.

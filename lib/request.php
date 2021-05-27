@@ -1,18 +1,18 @@
 <?php
 /**
  * Request management object.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Request
+ * Class Wordpress_GitHub_Sync_Request
  */
-class Writing_On_GitHub_Request {
+class Wordpress_GitHub_Sync_Request {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
@@ -30,11 +30,11 @@ class Writing_On_GitHub_Request {
     protected $headers;
 
     /**
-     * Writing_On_GitHub_Request constructor.
+     * Wordpress_GitHub_Sync_Request constructor.
      *
-     * @param Writing_On_GitHub $app Application container.
+     * @param Wordpress_GitHub_Sync $app Application container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
@@ -90,10 +90,10 @@ class Writing_On_GitHub_Request {
     /**
      * Returns a payload object for the given request.
      *
-     * @return Writing_On_GitHub_Payload
+     * @return Wordpress_GitHub_Sync_Payload
      */
     public function payload() {
-        return new Writing_On_GitHub_Payload( $this->app, $this->raw_data );
+        return new Wordpress_GitHub_Sync_Payload( $this->app, $this->raw_data );
     }
 
     /**
@@ -151,6 +151,6 @@ class Writing_On_GitHub_Request {
      * @return string
      */
     protected function secret() {
-        return get_option( 'wogh_secret' );
+        return get_option( 'wghs_secret' );
     }
 }

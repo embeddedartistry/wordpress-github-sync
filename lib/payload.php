@@ -1,18 +1,18 @@
 <?php
 /**
  * GitHub Webhook payload.
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Payload
+ * Class Wordpress_GitHub_Sync_Payload
  */
-class Writing_On_GitHub_Payload {
+class Wordpress_GitHub_Sync_Payload {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     protected $app;
 
@@ -24,12 +24,12 @@ class Writing_On_GitHub_Payload {
     protected $data;
 
     /**
-     * Writing_On_GitHub_Payload constructor.
+     * Wordpress_GitHub_Sync_Payload constructor.
      *
-     * @param Writing_On_GitHub $app      Application container.
+     * @param Wordpress_GitHub_Sync $app      Application container.
      * @param string                $raw_data Raw request data.
      */
-    public function __construct( Writing_On_GitHub $app, $raw_data ) {
+    public function __construct( Wordpress_GitHub_Sync $app, $raw_data ) {
         $this->app  = $app;
         $this->data = json_decode( $raw_data );
     }
@@ -68,10 +68,10 @@ class Writing_On_GitHub_Payload {
         }
 
         // We add a tag to commits we push out, so we shouldn't pull them in again.
-        $tag = apply_filters( 'wogh_commit_msg_tag', 'wogh' );
+        $tag = apply_filters( 'wghs_commit_msg_tag', 'wghs' );
 
         if ( ! $tag ) {
-            throw new Exception( __( 'Commit message tag not set. Filter `wogh_commit_msg_tag` misconfigured.', 'writing-on-github' ) );
+            throw new Exception( __( 'Commit message tag not set. Filter `wghs_commit_msg_tag` misconfigured.', 'wordpress-github-sync' ) );
         }
 
         if ( $tag === substr( $this->message(), -1 * strlen( $tag ) ) ) {

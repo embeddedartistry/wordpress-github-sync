@@ -1,27 +1,27 @@
 <?php
 /**
  * Controller object manages tree retrieval, manipulation and publishing
- * @package Writing_On_GitHub
+ * @package Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Controller
+ * Class Wordpress_GitHub_Sync_Controller
  */
-class Writing_On_GitHub_Controller {
+class Wordpress_GitHub_Sync_Controller {
 
     /**
      * Application container.
      *
-     * @var Writing_On_GitHub
+     * @var Wordpress_GitHub_Sync
      */
     public $app;
 
     /**
      * Instantiates a new Controller object
      *
-     * @param Writing_On_GitHub $app Applicatio container.
+     * @param Wordpress_GitHub_Sync $app Applicatio container.
      */
-    public function __construct( Writing_On_GitHub $app ) {
+    public function __construct( Wordpress_GitHub_Sync $app ) {
         $this->app = $app;
     }
 
@@ -37,20 +37,20 @@ class Writing_On_GitHub_Controller {
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
-                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'writing-on-github' ), 'Controller::pull_posts()' )
+                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'wordpress-github-sync' ), 'Controller::pull_posts()' )
             ) );
         }
 
         if ( ! $this->app->request()->is_secret_valid() ) {
             return $this->app->response()->error( new WP_Error(
                 'invalid_headers',
-                __( 'Failed to validate secret.', 'writing-on-github' )
+                __( 'Failed to validate secret.', 'wordpress-github-sync' )
             ) );
         }
 
         // ping
         if ( $this->app->request()->is_ping() ) {
-            return $this->app->response()->success( __( 'Wordpress is ready.', 'writing-on-github' ) );
+            return $this->app->response()->success( __( 'Wordpress is ready.', 'wordpress-github-sync' ) );
         }
 
         // push
@@ -77,7 +77,7 @@ class Writing_On_GitHub_Controller {
         // import the post, it is done with the same permissions as the initial export.
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
-        wp_set_current_user( get_option( 'wogh_default_user' ) );
+        wp_set_current_user( get_option( 'wghs_default_user' ) );
 
         $result = $this->app->import()->payload( $payload );
 
@@ -101,7 +101,7 @@ class Writing_On_GitHub_Controller {
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
-                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'writing-on-github' ), 'Controller::import_master()' )
+                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'wordpress-github-sync' ), 'Controller::import_master()' )
             ) );
         }
 
@@ -119,12 +119,12 @@ class Writing_On_GitHub_Controller {
 
         if ( is_wp_error( $result ) ) {
             /*　@var WP_Error $result */
-            update_option( '_wogh_import_error', $result->get_error_message() );
+            update_option( '_wghs_import_error', $result->get_error_message() );
 
             return $this->app->response()->error( $result );
         }
 
-        update_option( '_wogh_import_complete', 'yes' );
+        update_option( '_wghs_import_complete', 'yes' );
 
         return $this->app->response()->success( $result );
     }
@@ -140,7 +140,7 @@ class Writing_On_GitHub_Controller {
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
-                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'writing-on-github' ), 'Controller::export_all()' )
+                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'wordpress-github-sync' ), 'Controller::export_all()' )
             ) );
         }
 
@@ -156,12 +156,12 @@ class Writing_On_GitHub_Controller {
         // Maybe move option updating out of this class/upgrade message display?
         if ( is_wp_error( $result ) ) {
             /*　@var WP_Error $result */
-            update_option( '_wogh_export_error', $result->get_error_message() );
+            update_option( '_wghs_export_error', $result->get_error_message() );
 
             return $this->app->response()->error( $result );
         } else {
-            update_option( '_wogh_export_complete', 'yes' );
-            update_option( '_wogh_fully_exported', 'yes' );
+            update_option( '_wghs_export_complete', 'yes' );
+            update_option( '_wghs_fully_exported', 'yes' );
 
             return $this->app->response()->success( $result );
         }
@@ -184,7 +184,7 @@ class Writing_On_GitHub_Controller {
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
-                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'writing-on-github' ), 'Controller::export_post()' )
+                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'wordpress-github-sync' ), 'Controller::export_post()' )
             ) );
         }
 
@@ -192,7 +192,7 @@ class Writing_On_GitHub_Controller {
         // export the post, it is done with the same permissions as the initial export.
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
-        wp_set_current_user( get_option( 'wogh_default_user' ) );
+        wp_set_current_user( get_option( 'wghs_default_user' ) );
 
         $this->app->semaphore()->lock();
         $result = $this->app->export()->update( $post_id );
@@ -223,7 +223,7 @@ class Writing_On_GitHub_Controller {
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
-                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'writing-on-github' ), 'Controller::delete_post()' )
+                sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'wordpress-github-sync' ), 'Controller::delete_post()' )
             ) );
         }
 

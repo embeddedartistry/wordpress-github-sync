@@ -1,18 +1,18 @@
 <?php
 /**
  * The post object which represents both the GitHub and WordPress post
- * @package WP_Writing_On_GitHub
+ * @package WP_Wordpress_GitHub_Sync
  */
 
 /**
- * Class Writing_On_GitHub_Post
+ * Class Wordpress_GitHub_Sync_Post
  */
-class Writing_On_GitHub_Post {
+class Wordpress_GitHub_Sync_Post {
 
     /**
      * Api object
      *
-     * @var Writing_On_GitHub_Api
+     * @var Wordpress_GitHub_Sync_Api
      */
     public $api;
 
@@ -24,7 +24,7 @@ class Writing_On_GitHub_Post {
 
     /**
      * Blob object
-     * @var Writing_On_GitHub_Blob
+     * @var Wordpress_GitHub_Sync_Blob
      */
     public $blob;
 
@@ -62,11 +62,11 @@ class Writing_On_GitHub_Post {
      * Instantiates a new Post object
      *
      * @param int|array                 $id_or_args Either a post ID or an array of arguments.
-     * @param Writing_On_GitHub_Api $api API object.
+     * @param Wordpress_GitHub_Sync_Api $api API object.
      *
      * @todo remove database operations from this method
      */
-    public function __construct( $id_or_args, Writing_On_GitHub_Api $api ) {
+    public function __construct( $id_or_args, Wordpress_GitHub_Sync_Api $api ) {
         $this->api = $api;
 
         if ( is_numeric( $id_or_args ) ) {
@@ -128,7 +128,7 @@ class Writing_On_GitHub_Post {
      * Combines the 2 content parts for GitHub
      */
     public function github_content() {
-        $use_blob = wogh_is_dont_export_content() && $this->blob;
+        $use_blob = wghs_is_dont_export_content() && $this->blob;
         $content = $use_blob ?
             $this->blob->post_content() :
             $this->post_content();
@@ -161,7 +161,7 @@ class Writing_On_GitHub_Post {
             }
         }
 
-        return apply_filters( 'wogh_content_export', $content, $this );
+        return apply_filters( 'wghs_content_export', $content, $this );
     }
 
     public function old_github_path() {
@@ -170,7 +170,7 @@ class Writing_On_GitHub_Post {
 
     public function set_old_github_path( $path ) {
         $this->old_github_path = $path;
-        update_post_meta( $this->id, '_wogh_github_path', $path );
+        update_post_meta( $this->id, '_wghs_github_path', $path );
     }
 
 
@@ -256,7 +256,7 @@ class Writing_On_GitHub_Post {
             $name = $name . '/';
         }
 
-        return apply_filters( 'wogh_directory_published', $name, $this );
+        return apply_filters( 'wghs_directory_published', $name, $this );
     }
 
     /**
@@ -265,7 +265,7 @@ class Writing_On_GitHub_Post {
     public function github_filename() {
         $filename = $this->get_name() . '.md';
 
-        return apply_filters( 'wogh_filename', $filename, $this );
+        return apply_filters( 'wghs_filename', $filename, $this );
     }
 
     /**
@@ -286,8 +286,8 @@ class Writing_On_GitHub_Post {
      * @return boolean
      */
     public function is_on_github() {
-        $sha = get_post_meta( $this->id, '_wogh_sha', true );
-        $github_path = get_post_meta( $this->id, '_wogh_github_path', true );
+        $sha = get_post_meta( $this->id, '_wghs_sha', true );
+        $github_path = get_post_meta( $this->id, '_wghs_github_path', true );
         if ( $sha && $github_path ) {
             return true;
         }
@@ -300,7 +300,7 @@ class Writing_On_GitHub_Post {
      * @return string
      */
     public function github_view_url() {
-        $github_path = get_post_meta( $this->id, '_wogh_github_path', true );
+        $github_path = get_post_meta( $this->id, '_wghs_github_path', true );
         $repository = $this->api->fetch()->repository();
         $branch = $this->api->fetch()->branch();
 
@@ -313,7 +313,7 @@ class Writing_On_GitHub_Post {
      * @return string
      */
     public function github_edit_url() {
-        $github_path = get_post_meta( $this->id, '_wogh_github_path', true );
+        $github_path = get_post_meta( $this->id, '_wghs_github_path', true );
         $repository = $this->api->fetch()->repository();
         $branch = $this->api->fetch()->branch();
 
@@ -344,17 +344,17 @@ class Writing_On_GitHub_Post {
      * Returns String the sha1 hash
      */
     public function sha() {
-        $sha = get_post_meta( $this->id, '_wogh_sha', true );
+        $sha = get_post_meta( $this->id, '_wghs_sha', true );
 
         // If we've done a full export and we have no sha
         // then we should try a live check to see if it exists.
-        // if ( ! $sha && 'yes' === get_option( '_wogh_fully_exported' ) ) {
+        // if ( ! $sha && 'yes' === get_option( '_wghs_fully_exported' ) ) {
 
         //  // @todo could we eliminate this by calling down the full tree and searching it
         //  $data = $this->api->fetch()->remote_contents( $this );
 
         //  if ( ! is_wp_error( $data ) ) {
-        //      update_post_meta( $this->id, '_wogh_sha', $data->sha );
+        //      update_post_meta( $this->id, '_wghs_sha', $data->sha );
         //      $sha = $data->sha;
         //  }
         // }
@@ -373,7 +373,7 @@ class Writing_On_GitHub_Post {
      * @param string $sha
      */
     public function set_sha( $sha ) {
-        update_post_meta( $this->id, '_wogh_sha', $sha );
+        update_post_meta( $this->id, '_wghs_sha', $sha );
     }
 
     /**
@@ -401,7 +401,7 @@ class Writing_On_GitHub_Post {
         if ( empty($this->post->post_excerpt) ) {
             unset($meta['post_excerpt']);
         }
-        if ( 'yes' == get_option('wogh_ignore_author') ) {
+        if ( 'yes' == get_option('wghs_ignore_author') ) {
             unset($meta['author']);
         }
 
@@ -416,7 +416,7 @@ class Writing_On_GitHub_Post {
 
         // }
 
-        return apply_filters( 'wogh_post_meta', $meta, $this );
+        return apply_filters( 'wghs_post_meta', $meta, $this );
     }
 
     /**
@@ -457,7 +457,7 @@ class Writing_On_GitHub_Post {
 
     /**
      * Get the blob
-     * @return Writing_On_GitHub_Blob
+     * @return Wordpress_GitHub_Sync_Blob
      */
     public function get_blob() {
         return $this->blob;
@@ -465,9 +465,9 @@ class Writing_On_GitHub_Post {
 
     /**
      * Set the blob
-     * @param Writing_On_GitHub_Blob $blob
+     * @param Wordpress_GitHub_Sync_Blob $blob
      */
-    public function set_blob( Writing_On_GitHub_Blob $blob ) {
+    public function set_blob( Wordpress_GitHub_Sync_Blob $blob ) {
         $this->blob = $blob;
     }
 
@@ -488,7 +488,7 @@ class Writing_On_GitHub_Post {
     /**
      * Transforms the Post into a Blob.
      *
-     * @return Writing_On_GitHub_Blob
+     * @return Wordpress_GitHub_Sync_Blob
      */
     public function to_blob() {
         $data = new stdClass;
@@ -497,6 +497,6 @@ class Writing_On_GitHub_Post {
         $data->content = $this->github_content();
         $data->sha     = $this->sha();
 
-        return new Writing_On_GitHub_Blob( $data );
+        return new Wordpress_GitHub_Sync_Blob( $data );
     }
 }
