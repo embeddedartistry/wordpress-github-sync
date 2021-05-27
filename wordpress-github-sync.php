@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Wordpress GitHub Sync
+ * Plugin Name: Embedded Artistry Wordpress-GitHub Sync
  * Plugin URI: https://github.com/embeddedartistry/wordpress-github-sync
- * Description: A WordPress plugin to allow you writing on GitHub (or Jekyll site).
- * Version: 1.2
+ * Description: Synchronize published content between wordpress and GitHub
+ * Version: 1.0
  * Author:  Embedded Artistry
  * Author URI: https://embeddedartistry.com
  * License: GPLv2
