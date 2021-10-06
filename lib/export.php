@@ -158,7 +158,7 @@ class Wordpress_GitHub_Sync_Export {
                 sprintf(
                     'Move %s to %s via %s (two part commit)',
                     $old_github_path, $github_path,
-                    site_url(),
+                    site_url()
                 )
             ) . $this->get_commit_msg_tag();
 
@@ -178,7 +178,7 @@ class Wordpress_GitHub_Sync_Export {
                 sprintf(
                     'Create %s from %s',
                     $github_path,
-                    site_url(),
+                    site_url()
                 )
             ) . $this->get_commit_msg_tag();
             $result = $persist->create_file( $blob, $message );
@@ -235,7 +235,7 @@ class Wordpress_GitHub_Sync_Export {
             sprintf(
                 'Deleting %s via %s',
                 $github_path,
-                site_url(),
+                site_url()
             ),
             $post
         ) . $this->get_commit_msg_tag();
