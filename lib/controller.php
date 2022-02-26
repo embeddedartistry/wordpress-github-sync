@@ -188,7 +188,7 @@ class Wordpress_GitHub_Sync_Controller {
         // because we had a bug where we were changing the user for ORDERS
         // which actually show up as posts, but then returning later on.
         // This was causing bad things to happen in the store and stripe.
-        if(!$this->app->database->is_post_supported($post_id))
+        if(!$this->app->database()->is_post_supported($post_id))
         {
             return;
         }
