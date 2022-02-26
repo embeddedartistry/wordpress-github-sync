@@ -77,9 +77,12 @@ class Wordpress_GitHub_Sync_Controller {
         // import the post, it is done with the same permissions as the initial export.
         // This prevents problems with things like Heapless C++ course modules
         // working in a forced export, but not when we export the lesson page.
+        $current_user = wp_get_current_user();
         wp_set_current_user( get_option( 'wghs_default_user' ) );
 
         $result = $this->app->import()->payload( $payload );
+
+        wp_set_current_user($current_user);
 
         $this->app->semaphore()->unlock();
 
@@ -181,18 +184,21 @@ class Wordpress_GitHub_Sync_Controller {
             return;
         }
 
+        // We need to check EARLY to see if this post is supported,
+        // because we had a bug where we were changing the user for ORDERS
+        // which actually show up as posts, but then returning later on.
+        // This was causing bad things to happen in the store and stripe.
+        if(!$this->app->database->is_post_supported($post_id))
+        {
+            return;
+        }
+
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
                 sprintf( __( '%s : Semaphore is locked, import/export already in progress.', 'wordpress-github-sync' ), 'Controller::export_post()' )
             ) );
         }
-
-        // Here we set the user ID to the configured default so that when we
-        // export the post, it is done with the same permissions as the initial export.
-        // This prevents problems with things like Heapless C++ course modules
-        // working in a forced export, but not when we export the lesson page.
-        wp_set_current_user( get_option( 'wghs_default_user' ) );
 
         $this->app->semaphore()->lock();
         $result = $this->app->export()->update( $post_id );
