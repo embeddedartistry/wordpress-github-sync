@@ -184,16 +184,6 @@ class Wordpress_GitHub_Sync_Controller {
             return;
         }
 
-        // We need to check EARLY to see if this post is supported,
-        // because we had a bug where we were changing the user for ORDERS
-        // which actually show up as posts, but then returning later on.
-        // This was causing bad things to happen in the store and stripe.
-        // TODO: whitelisted post types does not belong in the database
-        if ( ! in_array( get_post_type($post_id), $this->app->database()->get_whitelisted_post_types() )
-        {
-            return;
-        }
-
         if ( ! $this->app->semaphore()->is_open() ) {
             return $this->app->response()->error( new WP_Error(
                 'semaphore_locked',
