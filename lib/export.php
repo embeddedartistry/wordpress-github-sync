@@ -34,15 +34,7 @@ class Wordpress_GitHub_Sync_Export {
      * @return string|WP_Error
      */
     public function full( $force = false ) {
-        // Here we set the user ID to the configured default so that when we
-        // export the post, it is done with the same permissions as the initial export.
-        // This prevents problems with things like Heapless C++ course modules
-        // working in a forced export, but not when we export the lesson page.
-        // (note to self: if it doesn't work here, put it in update())
-        $current_user = wp_get_current_user();
-        wp_set_current_user( get_option( 'wghs_default_user' ) );
         $posts = $this->app->database()->fetch_all_supported( $force );
-        wp_set_current_user($current_user);
 
         if ( is_wp_error( $posts ) ) {
             /*　@var WP_Error $posts */
@@ -106,7 +98,17 @@ class Wordpress_GitHub_Sync_Export {
             $post->set_old_github_path($old_github_path);
         }
 
+        // Here we set the user ID to the configured default so that when we
+        // export the post, it is done with the same permissions as the initial export.
+        // This prevents problems with things like Heapless C++ course modules
+        // working in a forced export, but not when we export the lesson page.
+        // (note to self: if it doesn't work here, put it in update())
+        $current_user = wp_get_current_user();
+        wp_set_current_user( get_option( 'wghs_default_user' ) );
+
         $result = $this->export_post( $post );
+
+        wp_set_current_user($current_user);
 
         if ( is_wp_error( $result ) ) {
             /* @var WP_Error $result */
