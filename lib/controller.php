@@ -188,7 +188,8 @@ class Wordpress_GitHub_Sync_Controller {
         // because we had a bug where we were changing the user for ORDERS
         // which actually show up as posts, but then returning later on.
         // This was causing bad things to happen in the store and stripe.
-        if(!$this->app->database()->is_post_supported($post_id))
+        // TODO: whitelisted post types does not belong in the database
+        if ( ! in_array( get_post_type($post_id), $this->app->database()->get_whitelisted_post_types() )
         {
             return;
         }

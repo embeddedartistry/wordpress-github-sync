@@ -221,7 +221,7 @@ class Wordpress_GitHub_Sync_Database {
      *
      * @return array
      */
-    protected function get_whitelisted_post_types() {
+    public function get_whitelisted_post_types() {
         return apply_filters( 'wghs_whitelisted_post_types', $this->whitelisted_post_types );
     }
 
