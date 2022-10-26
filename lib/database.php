@@ -124,19 +124,27 @@ class Wordpress_GitHub_Sync_Database {
     public function save_post( Wordpress_GitHub_Sync_Post $post ) {
         $args = apply_filters( 'wghs_pre_import_args', $this->post_args( $post ), $post );
 
-        if ( $post->is_new() ) {
-            error_log('This plugin does not support adding posts from GitHub. Please initially create content with the Wordpress front-end.');
-            return false;
-        }
-
         remove_filter( 'content_save_pre', 'wp_filter_post_kses' );
-        $post_id = wp_update_post( $args, true );
+        $post_id = $post->is_new() ?
+             wp_insert_post( $args, true ) :
+             wp_update_post( $args, true );
         add_filter( 'content_save_pre', 'wp_filter_post_kses' );
 
         if ( is_wp_error( $post_id ) ) {
             /* @var WP_Error $post_id */
             return $post_id;
         }
+
+        if ( $post->is_new() ) {
+             $author = false;
+             $meta = $post->get_meta();
+             if ( ! empty( $meta ) && ! empty( $meta['author'] ) ) {
+                 $author = $meta['author'];
+             }
+             $user    = $this->fetch_commit_user( $author );
+             $user_id = is_wp_error( $user ) ? 0 : $user->ID;
+             $this->set_post_author( $post_id, $user_id );
+         }
 
         $post->set_post( get_post( $post_id ) );
 
