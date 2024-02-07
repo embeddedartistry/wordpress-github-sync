@@ -189,9 +189,9 @@ class Wordpress_GitHub_Sync {
             function($matchs) use ($baseurl, $basedir) {
                 if (is_file($basedir . $matchs[2])) {
                     $url = $baseurl . $matchs[2];
-                    return "${matchs[1]}$url${matchs[3]}";
+                    return "{$matchs[1]}$url{$matchs[3]}";
                 }
-                return "${matchs[0]}";
+                return "{$matchs[0]}";
             },
             $content
         );
@@ -201,9 +201,9 @@ class Wordpress_GitHub_Sync {
             function($matchs) use ($baseurl, $basedir) {
                 if (is_file($basedir . $matchs[2])) {
                     $url = $baseurl . $matchs[2];
-                    return "${matchs[1]}$url${matchs[3]}";
+                    return "{$matchs[1]}$url{$matchs[3]}";
                 }
-                return "${matchs[0]}";
+                return "{$matchs[0]}";
             },
             $content
         );
