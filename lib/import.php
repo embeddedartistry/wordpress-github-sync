@@ -290,6 +290,11 @@ class Wordpress_GitHub_Sync_Import {
                 $args['post_date'] = $meta['post_date'];
                 unset( $meta['post_date'] );
             }
+
+            if ( array_key_exists( 'post_excerpt', $meta ) ) {
+                $args['post_excerpt'] = $meta['post_excerpt'];
+                unset( $meta['post_excerpt'] );
+            }
         }
 
         $meta['_wghs_sha'] = $blob->sha();

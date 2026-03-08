@@ -152,6 +152,48 @@ class Wordpress_GitHub_Sync_Database {
 
         update_post_meta( $post_id, '_wghs_sha', $meta['_wghs_sha'] );
 
+        $post_type = get_post_type( $post_id );
+
+        // Import glossary-specific metadata (CM Tooltip Glossary plugin)
+        if ( 'glossary' === $post_type ) {
+            if ( ! empty( $meta['cmtt_synonyms'] ) ) {
+                update_post_meta( $post_id, 'cmtt_synonyms', $meta['cmtt_synonyms'] );
+            }
+            if ( ! empty( $meta['cmtt_variations'] ) ) {
+                update_post_meta( $post_id, 'cmtt_variations', $meta['cmtt_variations'] );
+            }
+            if ( ! empty( $meta['cmtt_abbreviations'] ) ) {
+                update_post_meta( $post_id, 'cmtt_abbreviations', $meta['cmtt_abbreviations'] );
+            }
+        }
+
+        // Import lesson-specific metadata (Sensei LMS)
+        if ( 'lesson' === $post_type ) {
+            if ( ! empty( $meta['course'] ) ) {
+                $course_query = new WP_Query( array(
+                    'post_type'      => 'course',
+                    'title'          => $meta['course'],
+                    'posts_per_page' => 1,
+                    'fields'         => 'ids',
+                ) );
+                $course_ids = $course_query->get_posts();
+                if ( ! empty( $course_ids ) ) {
+                    update_post_meta( $post_id, '_lesson_course', $course_ids[0] );
+                }
+            }
+
+            if ( ! empty( $meta['module'] ) ) {
+                $module_slug = sanitize_title( $meta['module'] );
+                $module_term = get_term_by( 'slug', $module_slug, 'module' );
+                if ( ! $module_term ) {
+                    $module_term = get_term_by( 'name', $meta['module'], 'module' );
+                }
+                if ( $module_term ) {
+                    wp_set_object_terms( $post_id, $module_term->term_id, 'module' );
+                }
+            }
+        }
+
         return true;
     }
 

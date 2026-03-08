@@ -405,6 +405,37 @@ class Wordpress_GitHub_Sync_Post {
             unset($meta['author']);
         }
 
+        // Glossary-specific metadata (CM Tooltip Glossary plugin)
+        if ( 'glossary' === get_post_type( $this->post ) ) {
+            $synonyms = get_post_meta( $this->id, 'cmtt_synonyms', true );
+            if ( ! empty( $synonyms ) ) {
+                $meta['cmtt_synonyms'] = $synonyms;
+            }
+            $variations = get_post_meta( $this->id, 'cmtt_variations', true );
+            if ( ! empty( $variations ) ) {
+                $meta['cmtt_variations'] = $variations;
+            }
+            $abbreviations = get_post_meta( $this->id, 'cmtt_abbreviations', true );
+            if ( ! empty( $abbreviations ) ) {
+                $meta['cmtt_abbreviations'] = $abbreviations;
+            }
+        }
+
+        // Lesson-specific metadata (Sensei LMS)
+        if ( 'lesson' === get_post_type( $this->post ) ) {
+            $course_id = Sensei()->lesson->get_course_id( $this->id );
+            $course_name = get_the_title( $course_id );
+            if ( ! empty( $course_name ) ) {
+                $meta['course'] = $course_name;
+            }
+
+            $module = Sensei()->modules->get_lesson_module( $this->id );
+            if ( $module ) {
+                $exploded_module_name = explode( '(', $module->name );
+                $meta['module'] = trim( $exploded_module_name[0] );
+            }
+        }
+
         //convert traditional post_meta values, hide hidden values, skip already populated values
         // foreach ( get_post_custom( $this->id ) as $key => $value ) {
 
