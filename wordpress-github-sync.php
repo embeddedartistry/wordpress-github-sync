@@ -143,10 +143,14 @@ class Wordpress_GitHub_Sync {
 
         // Media library → media-index.json. Each handler marks the index
         // dirty; the actual GitHub push happens once on shutdown.
-        $mark_dirty = array( $this->media_index(), 'mark_dirty' );
-        add_action( 'add_attachment', $mark_dirty );
-        add_action( 'attachment_updated', $mark_dirty );
-        add_action( 'delete_attachment', $mark_dirty );
+        // Skipped if the class isn't autoloaded yet (e.g. composer install
+        // hasn't been re-run on the server after a deploy).
+        if ( class_exists( 'Wordpress_GitHub_Sync_Media_Index' ) ) {
+            $mark_dirty = array( $this->media_index(), 'mark_dirty' );
+            add_action( 'add_attachment', $mark_dirty );
+            add_action( 'attachment_updated', $mark_dirty );
+            add_action( 'delete_attachment', $mark_dirty );
+        }
         // Uncomment below to enable the "edit" button going to GitHub. I don't want it right now.
         // The reason being the Wordpress view gives me the control I need for things like
         // field atlas, courses, tooltips, etc.
