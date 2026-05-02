@@ -127,6 +127,30 @@ class Wordpress_GitHub_Sync_CLI extends WP_CLI_Command {
      * @param array $args Command arguments.
      * @param array $assoc_args Command associated arguments.
      */
+    /**
+     * Rebuilds media-index.json from the entire WordPress media library
+     * and pushes it to GitHub. Use this on first run to seed the index.
+     *
+     * ## EXAMPLES
+     *
+     *     wp wghs media_index_rebuild
+     *
+     * @subcommand media_index_rebuild
+     */
+    public function media_index_rebuild( $args, $assoc_args ) {
+        WP_CLI::line( __( 'Rebuilding media index from full library.', 'wordpress-github-sync' ) );
+
+        wp_set_current_user( (int) get_option( 'wghs_default_user' ) );
+
+        $result = $this->app->media_index()->flush();
+
+        if ( is_wp_error( $result ) ) {
+            WP_CLI::error( $result->get_error_message() );
+        }
+
+        WP_CLI::success( __( 'Media index pushed to GitHub.', 'wordpress-github-sync' ) );
+    }
+
     public function prime( $args, $assoc_args ) {
         if ( isset( $assoc_args['branch'] ) ) {
             WP_CLI::line( __( 'Starting branch import.', 'wordpress-github-sync' ) );

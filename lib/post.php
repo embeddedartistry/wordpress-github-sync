@@ -624,26 +624,14 @@ class Wordpress_GitHub_Sync_Post {
                 }
             }
 
-            // Images (export-only; ignored on import)
+            // Images: store attachment IDs. Resolve to URLs via media-index.json.
             $thumb_id = get_post_thumbnail_id( $this->id );
             if ( $thumb_id ) {
-                $url = wp_get_attachment_url( $thumb_id );
-                if ( $url ) {
-                    $meta['featured_image_url'] = $url;
-                }
+                $meta['featured_image_id'] = (int) $thumb_id;
             }
             $gallery_ids = $product->get_gallery_image_ids();
             if ( ! empty( $gallery_ids ) ) {
-                $urls = array();
-                foreach ( $gallery_ids as $gid ) {
-                    $url = wp_get_attachment_url( $gid );
-                    if ( $url ) {
-                        $urls[] = $url;
-                    }
-                }
-                if ( ! empty( $urls ) ) {
-                    $meta['gallery_image_urls'] = $urls;
-                }
+                $meta['gallery_image_ids'] = array_map( 'intval', $gallery_ids );
             }
 
             // Misc

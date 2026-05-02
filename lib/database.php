@@ -287,6 +287,30 @@ class Wordpress_GitHub_Sync_Database {
                 update_post_meta( $post_id, '_default_attributes', $meta['default_attributes'] );
             }
 
+            // Featured image
+            if ( isset( $meta['featured_image_id'] ) ) {
+                $thumb_id = (int) $meta['featured_image_id'];
+                if ( $thumb_id && get_post( $thumb_id ) ) {
+                    set_post_thumbnail( $post_id, $thumb_id );
+                } else {
+                    error_log( sprintf( __( 'featured_image_id %d not found in media library; skipping for product %d.' ), $thumb_id, $post_id ) );
+                }
+            }
+
+            // Gallery
+            if ( isset( $meta['gallery_image_ids'] ) && is_array( $meta['gallery_image_ids'] ) ) {
+                $valid = array();
+                foreach ( $meta['gallery_image_ids'] as $gid ) {
+                    $gid = (int) $gid;
+                    if ( $gid && get_post( $gid ) ) {
+                        $valid[] = $gid;
+                    } else {
+                        error_log( sprintf( __( 'gallery_image_id %d not found in media library; skipping for product %d.' ), $gid, $post_id ) );
+                    }
+                }
+                update_post_meta( $post_id, '_product_image_gallery', implode( ',', $valid ) );
+            }
+
             // Attributes
             if ( isset( $meta['attributes'] ) && is_array( $meta['attributes'] ) ) {
                 $this->import_product_attributes( $post_id, $meta['attributes'] );

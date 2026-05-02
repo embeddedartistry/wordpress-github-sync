@@ -102,6 +102,13 @@ class Wordpress_GitHub_Sync {
     protected $database;
 
     /**
+     * Media index object.
+     *
+     * @var Wordpress_GitHub_Sync_Media_Index
+     */
+    protected $media_index;
+
+    /**
      * Called at load time, hooks into WP core
      */
     public function __construct() {
@@ -133,6 +140,13 @@ class Wordpress_GitHub_Sync {
         add_action( 'wp_ajax_nopriv_wghs_push_request', array( $this->controller, 'pull_posts' ) );
         add_action( 'wghs_export', array( $this->controller, 'export_all' ), 10, 2 );
         add_action( 'wghs_import', array( $this->controller, 'import_master' ), 10, 2 );
+
+        // Media library → media-index.json. Each handler marks the index
+        // dirty; the actual GitHub push happens once on shutdown.
+        $mark_dirty = array( $this->media_index(), 'mark_dirty' );
+        add_action( 'add_attachment', $mark_dirty );
+        add_action( 'attachment_updated', $mark_dirty );
+        add_action( 'delete_attachment', $mark_dirty );
         // Uncomment below to enable the "edit" button going to GitHub. I don't want it right now.
         // The reason being the Wordpress view gives me the control I need for things like
         // field atlas, courses, tooltips, etc.
@@ -373,6 +387,19 @@ class Wordpress_GitHub_Sync {
         }
 
         return $this->database;
+    }
+
+    /**
+     * Lazy-load the Media Index object.
+     *
+     * @return Wordpress_GitHub_Sync_Media_Index
+     */
+    public function media_index() {
+        if ( ! $this->media_index ) {
+            $this->media_index = new Wordpress_GitHub_Sync_Media_Index( $this );
+        }
+
+        return $this->media_index;
     }
 
     /**
