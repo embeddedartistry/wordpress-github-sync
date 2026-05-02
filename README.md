@@ -98,13 +98,15 @@ The index is rebuilt and pushed to GitHub at most once per request, on `shutdown
 
 ### Seeding the index
 
-On first run, seed the full library with:
+The attachment hooks only fire on *changes* to the media library — they do not backfill existing attachments. After installing or upgrading the plugin, you must seed the index once with:
 
 ```
 $ wp wghs media_index_rebuild
 ```
 
-After that, the per-request hooks keep it current.
+Until you run this, `media-index.json` will not exist in the repo. The "Export to GitHub" and "Force Export to GitHub" buttons in the WordPress settings page export posts and products only; they do not touch the media index.
+
+After seeding, the per-request hooks keep the index current as you upload, edit, or delete attachments.
 
 ## Building the Plugin for Release
 
