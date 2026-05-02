@@ -240,6 +240,23 @@ class Wordpress_GitHub_Sync_Post {
 				}
 
 				break;
+            case 'product':
+                $name = 'products';
+                break;
+            case 'product_variation':
+                $parent_id = $this->post->post_parent;
+                if ( $parent_id ) {
+                    $parent = get_post( $parent_id );
+                    if ( $parent ) {
+                        $parent_slug = $parent->post_name ? $parent->post_name : sanitize_title( get_the_title( $parent ) );
+                        $name = 'products/' . $parent_slug . '/variations';
+                    } else {
+                        error_log( sprintf( __( 'Parent product %d not found for variation %d' ), $parent_id, $this->id ) );
+                    }
+                } else {
+                    error_log( sprintf( __( 'Variation %d has no parent product' ), $this->id ) );
+                }
+                break;
             default:
                 $obj = get_post_type_object( $this->type() );
 
@@ -436,6 +453,15 @@ class Wordpress_GitHub_Sync_Post {
             }
         }
 
+        // Product-specific metadata (WooCommerce)
+        $post_type = get_post_type( $this->post );
+        if ( ( 'product' === $post_type || 'product_variation' === $post_type ) && function_exists( 'wc_get_product' ) ) {
+            $product = wc_get_product( $this->id );
+            if ( $product ) {
+                $meta = array_merge( $meta, $this->product_meta( $product ) );
+            }
+        }
+
         //convert traditional post_meta values, hide hidden values, skip already populated values
         // foreach ( get_post_custom( $this->id ) as $key => $value ) {
 
@@ -448,6 +474,226 @@ class Wordpress_GitHub_Sync_Post {
         // }
 
         return apply_filters( 'wghs_post_meta', $meta, $this );
+    }
+
+    /**
+     * Builds WooCommerce-specific frontmatter for a product or product_variation.
+     *
+     * @param WC_Product $product
+     *
+     * @return array
+     */
+    protected function product_meta( $product ) {
+        $is_variation = $product->is_type( 'variation' );
+        $meta = array();
+
+        if ( $is_variation ) {
+            $parent_id = $product->get_parent_id();
+            if ( $parent_id ) {
+                $parent = get_post( $parent_id );
+                if ( $parent ) {
+                    $meta['parent_slug'] = $parent->post_name ? $parent->post_name : sanitize_title( get_the_title( $parent ) );
+                }
+            }
+
+            $attribute_values = array();
+            foreach ( $product->get_attributes() as $slug => $value ) {
+                if ( '' !== $value && null !== $value ) {
+                    $attribute_values[ $slug ] = $value;
+                }
+            }
+            if ( ! empty( $attribute_values ) ) {
+                $meta['attribute_values'] = $attribute_values;
+            }
+        } else {
+            $meta['product_type'] = $product->get_type();
+        }
+
+        // Identity
+        $sku = $product->get_sku();
+        if ( '' !== $sku ) {
+            $meta['sku'] = $sku;
+        }
+        if ( ! $is_variation ) {
+            $meta['featured'] = $product->get_featured();
+            $meta['catalog_visibility'] = $product->get_catalog_visibility();
+        }
+
+        // Pricing (preserve as strings; WC stores as strings)
+        $regular_price = $product->get_regular_price( 'edit' );
+        if ( '' !== $regular_price && null !== $regular_price ) {
+            $meta['regular_price'] = (string) $regular_price;
+        }
+        $sale_price = $product->get_sale_price( 'edit' );
+        if ( '' !== $sale_price && null !== $sale_price ) {
+            $meta['sale_price'] = (string) $sale_price;
+        }
+        $sale_from = $product->get_date_on_sale_from( 'edit' );
+        if ( $sale_from ) {
+            $meta['sale_price_dates_from'] = $sale_from->date( 'Y-m-d H:i:s' );
+        }
+        $sale_to = $product->get_date_on_sale_to( 'edit' );
+        if ( $sale_to ) {
+            $meta['sale_price_dates_to'] = $sale_to->date( 'Y-m-d H:i:s' );
+        }
+        if ( ! $is_variation ) {
+            $meta['tax_status'] = $product->get_tax_status();
+            $tax_class = $product->get_tax_class();
+            if ( '' !== $tax_class ) {
+                $meta['tax_class'] = $tax_class;
+            }
+        }
+
+        // Inventory configuration (NOT runtime stock counts)
+        $meta['manage_stock'] = (bool) $product->get_manage_stock();
+        $meta['stock_status'] = $product->get_stock_status();
+        $backorders = $product->get_backorders();
+        if ( '' !== $backorders ) {
+            $meta['backorders'] = $backorders;
+        }
+        if ( ! $is_variation ) {
+            $meta['sold_individually'] = (bool) $product->get_sold_individually();
+        }
+
+        // Shipping
+        foreach ( array( 'weight', 'length', 'width', 'height' ) as $dim ) {
+            $getter = 'get_' . $dim;
+            $value = $product->$getter();
+            if ( '' !== $value && null !== $value ) {
+                $meta[ $dim ] = (string) $value;
+            }
+        }
+        if ( ! $is_variation ) {
+            $shipping_class_id = $product->get_shipping_class_id();
+            if ( $shipping_class_id ) {
+                $term = get_term( $shipping_class_id, 'product_shipping_class' );
+                if ( $term && ! is_wp_error( $term ) ) {
+                    $meta['shipping_class'] = $term->slug;
+                }
+            }
+        }
+
+        // Type flags
+        $meta['virtual'] = (bool) $product->get_virtual();
+        $meta['downloadable'] = (bool) $product->get_downloadable();
+
+        // External-product fields
+        if ( ! $is_variation && $product->is_type( 'external' ) ) {
+            $product_url = $product->get_product_url();
+            if ( '' !== $product_url ) {
+                $meta['product_url'] = $product_url;
+            }
+            $button_text = $product->get_button_text();
+            if ( '' !== $button_text ) {
+                $meta['button_text'] = $button_text;
+            }
+        }
+
+        if ( ! $is_variation ) {
+            // Taxonomies
+            $cats = wp_get_post_terms( $this->id, 'product_cat', array( 'fields' => 'names' ) );
+            if ( ! is_wp_error( $cats ) && ! empty( $cats ) ) {
+                $meta['product_categories'] = $cats;
+            }
+            $tags = wp_get_post_terms( $this->id, 'product_tag', array( 'fields' => 'names' ) );
+            if ( ! is_wp_error( $tags ) && ! empty( $tags ) ) {
+                $meta['product_tags'] = $tags;
+            }
+
+            // Attributes
+            $attributes = $this->serialize_product_attributes( $product );
+            if ( ! empty( $attributes ) ) {
+                $meta['attributes'] = $attributes;
+            }
+
+            // Variable-product extras
+            if ( $product->is_type( 'variable' ) ) {
+                $defaults = $product->get_default_attributes();
+                if ( ! empty( $defaults ) ) {
+                    $meta['default_attributes'] = $defaults;
+                }
+                $variations = array();
+                foreach ( $product->get_children() as $child_id ) {
+                    $child = get_post( $child_id );
+                    if ( $child ) {
+                        $variations[] = $child->post_name ? $child->post_name : sanitize_title( get_the_title( $child ) );
+                    }
+                }
+                if ( ! empty( $variations ) ) {
+                    $meta['variations'] = $variations;
+                }
+            }
+
+            // Images (export-only; ignored on import)
+            $thumb_id = get_post_thumbnail_id( $this->id );
+            if ( $thumb_id ) {
+                $url = wp_get_attachment_url( $thumb_id );
+                if ( $url ) {
+                    $meta['featured_image_url'] = $url;
+                }
+            }
+            $gallery_ids = $product->get_gallery_image_ids();
+            if ( ! empty( $gallery_ids ) ) {
+                $urls = array();
+                foreach ( $gallery_ids as $gid ) {
+                    $url = wp_get_attachment_url( $gid );
+                    if ( $url ) {
+                        $urls[] = $url;
+                    }
+                }
+                if ( ! empty( $urls ) ) {
+                    $meta['gallery_image_urls'] = $urls;
+                }
+            }
+
+            // Misc
+            $purchase_note = $product->get_purchase_note();
+            if ( '' !== $purchase_note ) {
+                $meta['purchase_note'] = $purchase_note;
+            }
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Renders _product_attributes into a YAML-friendly nested array.
+     *
+     * @param WC_Product $product
+     *
+     * @return array
+     */
+    protected function serialize_product_attributes( $product ) {
+        $out = array();
+        $raw = get_post_meta( $this->id, '_product_attributes', true );
+        if ( ! is_array( $raw ) ) {
+            return $out;
+        }
+
+        foreach ( $raw as $slug => $attr ) {
+            $is_taxonomy = ! empty( $attr['is_taxonomy'] );
+            $entry = array(
+                'taxonomy' => (bool) $is_taxonomy,
+                'label'    => $is_taxonomy ? wc_attribute_label( $attr['name'] ) : $attr['name'],
+                'visible'  => ! empty( $attr['is_visible'] ),
+                'variation'=> ! empty( $attr['is_variation'] ),
+                'position' => isset( $attr['position'] ) ? (int) $attr['position'] : 0,
+            );
+
+            if ( $is_taxonomy ) {
+                $terms = wp_get_post_terms( $this->id, $attr['name'], array( 'fields' => 'names' ) );
+                $entry['terms'] = is_wp_error( $terms ) ? array() : $terms;
+            } else {
+                $value = isset( $attr['value'] ) ? $attr['value'] : '';
+                $values = array_map( 'trim', explode( '|', $value ) );
+                $values = array_values( array_filter( $values, 'strlen' ) );
+                $entry['values'] = $values;
+            }
+
+            $out[ $slug ] = $entry;
+        }
+
+        return $out;
     }
 
     /**

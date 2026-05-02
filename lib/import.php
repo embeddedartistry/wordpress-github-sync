@@ -133,7 +133,7 @@ class Wordpress_GitHub_Sync_Import {
     protected function importable_file( Wordpress_GitHub_Sync_File_Info $file ) {
 
         $path = $file->path;
-        $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/');
+        $prefixs = array( 'pages/', 'posts/', 'courses/', 'fieldatlas/', 'glossary/', 'newsletters/', 'products/');
         foreach ($prefixs as $prefix) {
             if ( ! strncasecmp($path, $prefix, strlen( $prefix ) ) ) {
                 return true;

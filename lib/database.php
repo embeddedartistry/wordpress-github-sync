@@ -28,7 +28,9 @@ class Wordpress_GitHub_Sync_Database {
         'newsletters',
         'course',
         'lesson',
-        'fieldatlas'
+        'fieldatlas',
+        'product',
+        'product_variation'
     );
 
     /**
@@ -194,7 +196,159 @@ class Wordpress_GitHub_Sync_Database {
             }
         }
 
+        // Product / product_variation metadata (WooCommerce)
+        if ( ( 'product' === $post_type || 'product_variation' === $post_type ) && function_exists( 'wc_delete_product_transients' ) ) {
+            $this->import_product_meta( $post_id, $post_type, $meta );
+            wc_delete_product_transients( $post_id );
+        }
+
         return true;
+    }
+
+    /**
+     * Writes WooCommerce product/variation metadata from imported frontmatter.
+     *
+     * @param int    $post_id
+     * @param string $post_type
+     * @param array  $meta
+     */
+    protected function import_product_meta( $post_id, $post_type, $meta ) {
+        // Scalar meta keys → post_meta keys
+        $scalar_map = array(
+            'sku'                   => '_sku',
+            'regular_price'         => '_regular_price',
+            'sale_price'            => '_sale_price',
+            'sale_price_dates_from' => '_sale_price_dates_from',
+            'sale_price_dates_to'   => '_sale_price_dates_to',
+            'tax_status'            => '_tax_status',
+            'tax_class'             => '_tax_class',
+            'stock_status'          => '_stock_status',
+            'backorders'            => '_backorders',
+            'weight'                => '_weight',
+            'length'                => '_length',
+            'width'                 => '_width',
+            'height'                => '_height',
+            'purchase_note'         => '_purchase_note',
+            'product_url'           => '_product_url',
+            'button_text'           => '_button_text',
+        );
+        foreach ( $scalar_map as $front => $meta_key ) {
+            if ( array_key_exists( $front, $meta ) ) {
+                update_post_meta( $post_id, $meta_key, $meta[ $front ] );
+            }
+        }
+
+        // Booleans stored as yes/no
+        $yesno_map = array(
+            'manage_stock'      => '_manage_stock',
+            'sold_individually' => '_sold_individually',
+            'virtual'           => '_virtual',
+            'downloadable'      => '_downloadable',
+            'featured'          => '_featured',
+        );
+        foreach ( $yesno_map as $front => $meta_key ) {
+            if ( array_key_exists( $front, $meta ) ) {
+                update_post_meta( $post_id, $meta_key, $meta[ $front ] ? 'yes' : 'no' );
+            }
+        }
+
+        if ( array_key_exists( 'catalog_visibility', $meta ) ) {
+            wp_set_object_terms( $post_id, $meta['catalog_visibility'], 'product_visibility' );
+        }
+
+        if ( 'product' === $post_type ) {
+            // Product type taxonomy (simple|external|variable). Variations don't have this taxonomy.
+            if ( ! empty( $meta['product_type'] ) ) {
+                wp_set_object_terms( $post_id, $meta['product_type'], 'product_type' );
+            }
+
+            // Categories
+            if ( isset( $meta['product_categories'] ) ) {
+                $cats = is_array( $meta['product_categories'] ) ? $meta['product_categories'] : array( $meta['product_categories'] );
+                wp_set_object_terms( $post_id, $cats, 'product_cat' );
+            }
+
+            // Tags
+            if ( isset( $meta['product_tags'] ) ) {
+                $tags = is_array( $meta['product_tags'] ) ? $meta['product_tags'] : array( $meta['product_tags'] );
+                wp_set_object_terms( $post_id, $tags, 'product_tag' );
+            }
+
+            // Shipping class
+            if ( ! empty( $meta['shipping_class'] ) ) {
+                $term = get_term_by( 'slug', $meta['shipping_class'], 'product_shipping_class' );
+                if ( $term ) {
+                    wp_set_object_terms( $post_id, $term->term_id, 'product_shipping_class' );
+                }
+            }
+
+            // Default attributes (variable products)
+            if ( isset( $meta['default_attributes'] ) && is_array( $meta['default_attributes'] ) ) {
+                update_post_meta( $post_id, '_default_attributes', $meta['default_attributes'] );
+            }
+
+            // Attributes
+            if ( isset( $meta['attributes'] ) && is_array( $meta['attributes'] ) ) {
+                $this->import_product_attributes( $post_id, $meta['attributes'] );
+            }
+        }
+
+        if ( 'product_variation' === $post_type && ! empty( $meta['attribute_values'] ) && is_array( $meta['attribute_values'] ) ) {
+            foreach ( $meta['attribute_values'] as $slug => $value ) {
+                update_post_meta( $post_id, 'attribute_' . $slug, $value );
+            }
+        }
+    }
+
+    /**
+     * Reconstructs _product_attributes and assigns taxonomy terms.
+     *
+     * @param int   $post_id
+     * @param array $attributes Nested attribute structure from frontmatter.
+     */
+    protected function import_product_attributes( $post_id, $attributes ) {
+        $out = array();
+        $position = 0;
+
+        foreach ( $attributes as $slug => $entry ) {
+            if ( ! is_array( $entry ) ) {
+                continue;
+            }
+
+            $is_taxonomy = ! empty( $entry['taxonomy'] );
+            $name = $is_taxonomy ? $slug : ( isset( $entry['label'] ) ? $entry['label'] : $slug );
+            $pos = isset( $entry['position'] ) ? (int) $entry['position'] : $position++;
+
+            // If marked as taxonomy but the global pa_* taxonomy isn't registered on this site,
+            // downgrade to a local attribute so the data is preserved.
+            if ( $is_taxonomy && ! taxonomy_exists( $slug ) ) {
+                error_log( sprintf( __( 'Global product attribute taxonomy %s does not exist; importing as local attribute.' ), $slug ) );
+                $is_taxonomy = false;
+                $name = isset( $entry['label'] ) ? $entry['label'] : $slug;
+            }
+
+            if ( $is_taxonomy ) {
+                $terms = isset( $entry['terms'] ) && is_array( $entry['terms'] ) ? $entry['terms'] : array();
+                if ( ! empty( $terms ) ) {
+                    wp_set_object_terms( $post_id, $terms, $slug );
+                }
+                $value = '';
+            } else {
+                $values = isset( $entry['values'] ) && is_array( $entry['values'] ) ? $entry['values'] : array();
+                $value = implode( ' | ', $values );
+            }
+
+            $out[ sanitize_title( $slug ) ] = array(
+                'name'         => $name,
+                'value'        => $value,
+                'position'     => $pos,
+                'is_visible'   => ! empty( $entry['visible'] ) ? 1 : 0,
+                'is_variation' => ! empty( $entry['variation'] ) ? 1 : 0,
+                'is_taxonomy'  => $is_taxonomy ? 1 : 0,
+            );
+        }
+
+        update_post_meta( $post_id, '_product_attributes', $out );
     }
 
     protected function post_args( $post ) {
@@ -203,6 +357,16 @@ class Wordpress_GitHub_Sync_Database {
 
         // prevent backslash loss
         $args['post_content'] = addslashes( $args['post_content'] );
+
+        // Resolve product_variation parent from parent_slug.
+        if ( isset( $args['post_type'] ) && 'product_variation' === $args['post_type'] && ! empty( $meta['parent_slug'] ) ) {
+            $parent = get_page_by_path( $meta['parent_slug'], OBJECT, 'product' );
+            if ( $parent ) {
+                $args['post_parent'] = $parent->ID;
+            } else {
+                error_log( sprintf( __( 'Parent product %s not found for variation import.' ), $meta['parent_slug'] ) );
+            }
+        }
 
         // update tags
         if ( ! empty( $meta['tags'] ) ) {
