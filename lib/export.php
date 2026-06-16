@@ -250,7 +250,16 @@ class Wordpress_GitHub_Sync_Export {
             $post
         ) . $this->get_commit_msg_tag();
 
-        $result = $this->app->api()->persist()->delete_file( $github_path, $post->sha(), $message );
+        // The Contents API rejects a DELETE whose sha does not match the file's
+        // current blob sha (HTTP 409). The sha cached in post meta drifts when
+        // the file is edited on GitHub directly, so prefer the live sha and only
+        // fall back to the stored one if the lookup fails.
+        $sha = $this->app->api()->fetch()->remote_sha( $github_path );
+        if ( is_wp_error( $sha ) ) {
+            $sha = $post->sha();
+        }
+
+        $result = $this->app->api()->persist()->delete_file( $github_path, $sha, $message );
 
         if ( is_wp_error( $result ) ) {
             /*　@var WP_Error $result */
@@ -258,6 +267,48 @@ class Wordpress_GitHub_Sync_Export {
         }
 
         return __( 'Export to GitHub completed successfully.', 'wordpress-github-sync' );
+    }
+
+    /**
+     * Removes a file from master to mirror a front-end post deletion.
+     *
+     * The import-side `deleted: true` marker removes the WordPress post via the
+     * database, but -- unlike a front-end delete, which fires the delete_post
+     * hook -- it leaves the source file in the repo. This pushes the same
+     * "Deleting <path> via <site>" commit the front-end path produces, so a
+     * marked deletion ends up identical to one performed in wp-admin.
+     *
+     * Keyed off the blob's path rather than post meta, because by the time this
+     * runs the post (and its _wghs_github_path) has already been deleted.
+     *
+     * @param string $github_path Path of the file to remove from the repo.
+     *
+     * @return true|WP_Error
+     */
+    public function delete_file( $github_path ) {
+        $message = apply_filters(
+            'wghs_commit_msg_delete',
+            sprintf(
+                'Deleting %s via %s',
+                $github_path,
+                site_url()
+            )
+        ) . $this->get_commit_msg_tag();
+
+        $sha = $this->app->api()->fetch()->remote_sha( $github_path );
+        if ( is_wp_error( $sha ) ) {
+            // The file may already be gone from the repo; nothing to remove.
+            return true;
+        }
+
+        $result = $this->app->api()->persist()->delete_file( $github_path, $sha, $message );
+
+        if ( is_wp_error( $result ) ) {
+            /* @var WP_Error $result */
+            return $result;
+        }
+
+        return true;
     }
 
     /**

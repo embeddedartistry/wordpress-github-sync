@@ -127,8 +127,9 @@ class Wordpress_GitHub_Sync_Database {
      *
      * @param Wordpress_GitHub_Sync_Blob $blob Blob carrying `deleted: true`.
      *
-     * @return true|WP_Error True on success (including when nothing matched),
-     *                        WP_Error if WordPress failed to remove the post.
+     * @return int|WP_Error The ID of the post that was removed, 0 when nothing
+     *                       matched (a safe no-op), or WP_Error if WordPress
+     *                       failed to remove a post it did find.
      */
     public function delete_post( Wordpress_GitHub_Sync_Blob $blob ) {
         $post_id = $this->resolve_post_id_for_blob( $blob );
@@ -140,7 +141,7 @@ class Wordpress_GitHub_Sync_Database {
                 __( 'No post found to delete for %s; skipping.', 'wordpress-github-sync' ),
                 $blob->path()
             ) );
-            return true;
+            return 0;
         }
 
         $force = (bool) apply_filters( 'wghs_force_delete', false, $blob, $post_id );
@@ -158,7 +159,7 @@ class Wordpress_GitHub_Sync_Database {
             );
         }
 
-        return true;
+        return (int) $post_id;
     }
 
     /**

@@ -99,6 +99,14 @@ class Wordpress_GitHub_Sync_Import {
                     // the file itself remaining in the repo.
                     if ( $this->is_delete_marker( $blob ) ) {
                         $result = $this->app->database()->delete_post( $blob );
+
+                        // When a post was actually removed (a positive ID, not
+                        // the 0 no-op), mirror a front-end delete by removing
+                        // the source file from the repo too. An unresolved
+                        // marker leaves the file in place.
+                        if ( ! is_wp_error( $result ) && $result ) {
+                            $result = $this->app->export()->delete_file( $blob->path() );
+                        }
                     } elseif ( $this->is_variation_blob( $blob ) && ! $this->variation_parent_exists( $blob ) ) {
                         // Defer variations whose parent product is not yet present.
                         $deferred[] = $blob;
