@@ -75,6 +75,15 @@ class Wordpress_GitHub_Sync_Import {
 
         $deferred = array();
 
+        // Parent product IDs that received variations in this batch. After all
+        // variations are imported we must sync each variable parent so
+        // WooCommerce registers its children; otherwise a freshly-imported
+        // variable product has the `variable` type term and `_product_attributes`
+        // but no synced children, and WooCommerce re-derives it as `simple` on
+        // the next load (which then exports back to the repo as `simple`,
+        // dropping the variations list). See sync_variable_parents().
+        $variation_parent_ids = array();
+
         foreach ( $files as $file ) {
             if ( ! $this->importable_file( $file ) ) {
                 continue;
@@ -113,6 +122,13 @@ class Wordpress_GitHub_Sync_Import {
                         continue;
                     } else {
                         $result = $this->import_post( $blob, $force );
+
+                        if ( ! is_wp_error( $result ) && $this->is_variation_blob( $blob ) ) {
+                            $parent_id = $this->variation_parent_id( $blob );
+                            if ( $parent_id ) {
+                                $variation_parent_ids[ $parent_id ] = $parent_id;
+                            }
+                        }
                     }
                 }
             }
@@ -134,10 +150,64 @@ class Wordpress_GitHub_Sync_Import {
             if ( is_wp_error( $result ) ) {
                 /* @var WP_Error $result */
                 $error = wghs_append_error( $error, $result );
+            } else {
+                $parent_id = $this->variation_parent_id( $blob );
+                if ( $parent_id ) {
+                    $variation_parent_ids[ $parent_id ] = $parent_id;
+                }
             }
         }
 
+        // Final pass: sync every variable parent that received variations so
+        // WooCommerce links the children and preserves the `variable` type.
+        $this->sync_variable_parents( $variation_parent_ids );
+
         return $error;
+    }
+
+    /**
+     * Resolves the WordPress product ID for a variation blob's parent_slug.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob
+     *
+     * @return int Parent product ID, or 0 if it cannot be resolved.
+     */
+    protected function variation_parent_id( Wordpress_GitHub_Sync_Blob $blob ) {
+        $slug = $this->variation_parent_slug( $blob );
+        if ( '' === $slug ) {
+            return 0;
+        }
+
+        $parent = get_page_by_path( $slug, OBJECT, 'product' );
+
+        return $parent ? (int) $parent->ID : 0;
+    }
+
+    /**
+     * Syncs variable parent products so WooCommerce registers their variations.
+     *
+     * Setting the `variable` product_type term and `_product_attributes` is not
+     * enough: WooCommerce only treats a product as variable (and keeps it that
+     * way) once its variation children are synced. Without this, an imported
+     * variable product reverts to `simple` on its next load and the change
+     * round-trips back to the repo, dropping the variations list.
+     *
+     * @param array $parent_ids ID-keyed map of parent product IDs.
+     */
+    protected function sync_variable_parents( $parent_ids ) {
+        if ( empty( $parent_ids ) || ! class_exists( 'WC_Product_Variable' ) ) {
+            return;
+        }
+
+        foreach ( $parent_ids as $parent_id ) {
+            // sync() rebuilds the parent's variation children list and price
+            // cache, and clears the relevant transients.
+            WC_Product_Variable::sync( $parent_id );
+
+            if ( function_exists( 'wc_delete_product_transients' ) ) {
+                wc_delete_product_transients( $parent_id );
+            }
+        }
     }
 
     /**
