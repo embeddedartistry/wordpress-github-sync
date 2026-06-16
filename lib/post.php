@@ -110,6 +110,13 @@ class Wordpress_GitHub_Sync_Post {
     }
 
     /**
+     * Returns the parent post ID (0 if none).
+     */
+    public function get_post_parent_id() {
+        return (int) $this->post->post_parent;
+    }
+
+    /**
      * Returns the post name
      */
     public function name() {

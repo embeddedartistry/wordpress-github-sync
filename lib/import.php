@@ -63,6 +63,18 @@ class Wordpress_GitHub_Sync_Import {
 
         $error = true;
 
+        // A product_variation links to its parent product via parent_slug, which
+        // is resolved against the database at import time (see Database::post_args).
+        // If a variation is imported before its parent product exists, the lookup
+        // fails and the variation is saved parentless -- which then exports back as
+        // an orphan file at the repo root. Guard against this two ways:
+        //   1. Order the batch so parent products are imported before variations.
+        //   2. Defer any variation whose parent still cannot be resolved and retry
+        //      it after the first pass, once every parent in the batch has landed.
+        $files = $this->sort_files_parents_first( $files );
+
+        $deferred = array();
+
         foreach ( $files as $file ) {
             if ( ! $this->importable_file( $file ) ) {
                 continue;
@@ -82,7 +94,12 @@ class Wordpress_GitHub_Sync_Import {
             } elseif ( $this->importable_post( $blob ) ) {
                 // To prevent production errors, we don't remove posts via GitHub file deletion.
                 if ( ! $is_remove ) {
-                   $result = $this->import_post( $blob, $force );
+                    // Defer variations whose parent product is not yet present.
+                    if ( $this->is_variation_blob( $blob ) && ! $this->variation_parent_exists( $blob ) ) {
+                        $deferred[] = $blob;
+                        continue;
+                    }
+                    $result = $this->import_post( $blob, $force );
                 }
             }
 
@@ -92,7 +109,96 @@ class Wordpress_GitHub_Sync_Import {
             }
         }
 
+        // Second pass: retry deferred variations now that all parents are imported.
+        foreach ( $deferred as $blob ) {
+            if ( ! $this->variation_parent_exists( $blob ) ) {
+                error_log( sprintf( __( 'Parent product %s not found for variation %s after import; skipping to avoid creating an orphan.' ), $this->variation_parent_slug( $blob ), $blob->path() ) );
+                continue;
+            }
+
+            $result = $this->import_post( $blob, $force );
+            if ( is_wp_error( $result ) ) {
+                /* @var WP_Error $result */
+                $error = wghs_append_error( $error, $result );
+            }
+        }
+
         return $error;
+    }
+
+    /**
+     * Orders files so parent products are imported before product variations.
+     *
+     * Sorts by path depth (shallower first), so products/<slug>.md precedes
+     * products/<slug>/variations/<child>.md. Stable for everything else.
+     *
+     * @param array $files
+     *
+     * @return array
+     */
+    protected function sort_files_parents_first( $files ) {
+        $indexed = array();
+        foreach ( $files as $i => $file ) {
+            $indexed[] = array( $i, $file );
+        }
+
+        usort( $indexed, function ( $a, $b ) {
+            $depth_a = substr_count( $a[1]->path, '/' );
+            $depth_b = substr_count( $b[1]->path, '/' );
+            if ( $depth_a !== $depth_b ) {
+                return $depth_a - $depth_b;
+            }
+            // Preserve original order for equal depth (stable sort).
+            return $a[0] - $b[0];
+        } );
+
+        $sorted = array();
+        foreach ( $indexed as $pair ) {
+            $sorted[] = $pair[1];
+        }
+
+        return $sorted;
+    }
+
+    /**
+     * Whether a blob represents a product_variation with a declared parent.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob
+     *
+     * @return bool
+     */
+    protected function is_variation_blob( Wordpress_GitHub_Sync_Blob $blob ) {
+        $meta = $blob->meta();
+        return ! empty( $meta['layout'] )
+            && 'product_variation' === $meta['layout']
+            && ! empty( $meta['parent_slug'] );
+    }
+
+    /**
+     * Returns the parent_slug declared by a variation blob, or ''.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob
+     *
+     * @return string
+     */
+    protected function variation_parent_slug( Wordpress_GitHub_Sync_Blob $blob ) {
+        $meta = $blob->meta();
+        return ! empty( $meta['parent_slug'] ) ? $meta['parent_slug'] : '';
+    }
+
+    /**
+     * Whether the parent product for a variation blob already exists in WordPress.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob
+     *
+     * @return bool
+     */
+    protected function variation_parent_exists( Wordpress_GitHub_Sync_Blob $blob ) {
+        $slug = $this->variation_parent_slug( $blob );
+        if ( '' === $slug ) {
+            return false;
+        }
+        return (bool) get_page_by_path( $slug, OBJECT, 'product' );
     }
 
     /**

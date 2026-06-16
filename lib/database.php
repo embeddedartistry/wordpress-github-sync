@@ -512,6 +512,14 @@ class Wordpress_GitHub_Sync_Database {
             return false;
         }
 
+        // A product_variation with no parent product cannot be written to a
+        // products/<parent>/variations/ path, so exporting it would dump an
+        // orphan file at the repo root that can never be re-imported. Skip it.
+        if ( 'product_variation' === $post->type() && ! $post->get_post_parent_id() ) {
+            error_log(sprintf(__('Product variation %d has no parent product; skipping export.'), $post->id));
+            return false;
+        }
+
         if ( $post->has_password() ) {
             error_log(sprintf(__('Post ID %d has a password'), $post->id));
             return false;
