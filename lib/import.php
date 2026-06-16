@@ -184,13 +184,24 @@ class Wordpress_GitHub_Sync_Import {
     }
 
     /**
-     * Syncs variable parent products so WooCommerce registers their variations.
+     * Reconciles variable parents whose variations were imported in this batch.
      *
-     * Setting the `variable` product_type term and `_product_attributes` is not
-     * enough: WooCommerce only treats a product as variable (and keeps it that
-     * way) once its variation children are synced. Without this, an imported
-     * variable product reverts to `simple` on its next load and the change
-     * round-trips back to the repo, dropping the variations list.
+     * The variable `product_type` term, `_product_attributes`, and the variation
+     * posts (correctly parented) are all written during import -- so the data on
+     * disk is correct. The problem is a stale object cache: when a parent product
+     * is saved and then re-exported within the same request, the parent's product
+     * object was cached as `simple` (built before its variations existed), and WC
+     * never invalidates it. The export then reads that stale `simple` object and
+     * writes `product_type: simple` back to the repo, dropping the variations.
+     *
+     * (A plain WC_Product_Variable::sync() does not help: it loads the product
+     * via wc_get_product(), gets the cached `simple` object, and bails -- the
+     * cache must be busted first so it loads a variable object.)
+     *
+     * For each affected parent we therefore: bust the post and product caches so
+     * the next read resolves the correct `variable` class, run sync() to rebuild
+     * the children/price cache, then re-export the parent so the corrected
+     * `variable` frontmatter (with its variations list) reaches the repository.
      *
      * @param array $parent_ids ID-keyed map of parent product IDs.
      */
@@ -200,12 +211,35 @@ class Wordpress_GitHub_Sync_Import {
         }
 
         foreach ( $parent_ids as $parent_id ) {
-            // sync() rebuilds the parent's variation children list and price
-            // cache, and clears the relevant transients.
-            WC_Product_Variable::sync( $parent_id );
-
+            // Bust the stale `simple` object that was cached before the
+            // variations were imported, so the next load resolves `variable`.
+            clean_post_cache( $parent_id );
+            wp_cache_delete( $parent_id, 'posts' );
             if ( function_exists( 'wc_delete_product_transients' ) ) {
                 wc_delete_product_transients( $parent_id );
+            }
+
+            // Now sync() loads a fresh variable object and rebuilds its
+            // children list and price cache.
+            WC_Product_Variable::sync( $parent_id );
+
+            // Re-export the parent so the repository receives the corrected
+            // `variable` frontmatter; without this the flattened `simple`
+            // export written earlier in the request remains on GitHub.
+            $post = new Wordpress_GitHub_Sync_Post( $parent_id, $this->app->api() );
+
+            // The parent already has a GitHub path from its earlier export this
+            // request. Seed old_github_path from that stored meta so export_post
+            // takes the update branch (and skips if unchanged) rather than
+            // attempting to create a duplicate file.
+            $existing_path = get_post_meta( $parent_id, '_wghs_github_path', true );
+            if ( $existing_path ) {
+                $post->set_old_github_path( $existing_path );
+            }
+
+            $result = $this->app->export()->export_post( $post );
+            if ( is_wp_error( $result ) ) {
+                error_log( sprintf( __( 'Failed to re-export variable parent %d after sync: %s' ), $parent_id, $result->get_error_message() ) );
             }
         }
     }
