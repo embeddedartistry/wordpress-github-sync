@@ -28,10 +28,31 @@ Specified types:
 
 Caveats:
 
-- Posts cannot be deleted on the front-end by removing files from the repository
+- Posts cannot be deleted on the front-end by removing files from the repository (but see [Deleting a post](#deleting-a-post) for the explicit, opt-in mechanism)
 - Posts cannot be added to the front-end by adding new files with the appropriate metadata header to the repository (unlike the litefeel version)
 
 These limitations are in place to prevent front-end problems, whether due to a bad commit or due to the need for complex 
+
+## Deleting a post
+
+Removing a file from the repository deliberately does **not** delete its WordPress post, so an accidental or bad commit cannot wipe production content. To delete a post, add a truthy `deleted` field to the file's frontmatter and let it sync:
+
+```yaml
+---
+ID: 1234
+post_title: Obsolete Article
+deleted: true
+---
+```
+
+On import the plugin resolves the target post -- by `ID`, then by the stored `_wghs_github_path`, then by the filename slug -- and removes it. The post is **trashed** (a reversible operation) by default. To permanently delete instead, hook the `wghs_force_delete` filter:
+
+```php
+add_filter( 'wghs_force_delete', '__return_true' );
+```
+
+If no matching post is found the marker is treated as a no-op, so re-running an import is safe. The file itself can remain in the repo as a tombstone, or be removed in the same commit.
+
 
 ## How the Plugin Works
 

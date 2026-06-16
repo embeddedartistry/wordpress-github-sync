@@ -94,12 +94,18 @@ class Wordpress_GitHub_Sync_Import {
             } elseif ( $this->importable_post( $blob ) ) {
                 // To prevent production errors, we don't remove posts via GitHub file deletion.
                 if ( ! $is_remove ) {
-                    // Defer variations whose parent product is not yet present.
-                    if ( $this->is_variation_blob( $blob ) && ! $this->variation_parent_exists( $blob ) ) {
+                    // An explicit `deleted: true` marker in the frontmatter is the
+                    // sanctioned way to remove a post -- it's opt-in and survives
+                    // the file itself remaining in the repo.
+                    if ( $this->is_delete_marker( $blob ) ) {
+                        $result = $this->app->database()->delete_post( $blob );
+                    } elseif ( $this->is_variation_blob( $blob ) && ! $this->variation_parent_exists( $blob ) ) {
+                        // Defer variations whose parent product is not yet present.
                         $deferred[] = $blob;
                         continue;
+                    } else {
+                        $result = $this->import_post( $blob, $force );
                     }
-                    $result = $this->import_post( $blob, $force );
                 }
             }
 
@@ -158,6 +164,36 @@ class Wordpress_GitHub_Sync_Import {
         }
 
         return $sorted;
+    }
+
+    /**
+     * Whether a blob requests deletion of its WordPress post.
+     *
+     * A truthy `deleted` field in the frontmatter (true, "true", "yes", 1)
+     * marks the post for removal instead of import.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob
+     *
+     * @return bool
+     */
+    protected function is_delete_marker( Wordpress_GitHub_Sync_Blob $blob ) {
+        $meta = $blob->meta();
+
+        if ( ! array_key_exists( 'deleted', $meta ) ) {
+            return false;
+        }
+
+        $deleted = $meta['deleted'];
+
+        if ( is_bool( $deleted ) ) {
+            return $deleted;
+        }
+
+        return in_array(
+            strtolower( (string) $deleted ),
+            array( 'true', 'yes', '1' ),
+            true
+        );
     }
 
     /**

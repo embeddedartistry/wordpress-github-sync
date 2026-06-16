@@ -117,6 +117,99 @@ class Wordpress_GitHub_Sync_Database {
     }
 
     /**
+     * Deletes the post matching an imported blob.
+     *
+     * Resolves the target WordPress post from the blob's frontmatter -- by
+     * explicit `ID`, then by the stored `_wghs_github_path`, then by the
+     * filename slug -- and removes it. By default the post is trashed (a
+     * reversible operation); set the `wghs_force_delete` filter to true to
+     * permanently delete it instead.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob Blob carrying `deleted: true`.
+     *
+     * @return true|WP_Error True on success (including when nothing matched),
+     *                        WP_Error if WordPress failed to remove the post.
+     */
+    public function delete_post( Wordpress_GitHub_Sync_Blob $blob ) {
+        $post_id = $this->resolve_post_id_for_blob( $blob );
+
+        if ( ! $post_id ) {
+            // Nothing to delete -- treat as a no-op so a re-import of a
+            // delete marker doesn't error out.
+            error_log( sprintf(
+                __( 'No post found to delete for %s; skipping.', 'wordpress-github-sync' ),
+                $blob->path()
+            ) );
+            return true;
+        }
+
+        $force = (bool) apply_filters( 'wghs_force_delete', false, $blob, $post_id );
+
+        $result = wp_delete_post( $post_id, $force );
+
+        if ( ! $result ) {
+            return new WP_Error(
+                'delete_failed',
+                sprintf(
+                    __( 'Failed to delete post ID %s for %s.', 'wordpress-github-sync' ),
+                    $post_id,
+                    $blob->path()
+                )
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Resolves the WordPress post ID a blob refers to.
+     *
+     * Tries, in order: the `ID` declared in frontmatter, the post carrying a
+     * matching `_wghs_github_path`, and finally the slug parsed from the
+     * filename. Returns 0 when no post matches.
+     *
+     * @param Wordpress_GitHub_Sync_Blob $blob
+     *
+     * @return int
+     */
+    protected function resolve_post_id_for_blob( Wordpress_GitHub_Sync_Blob $blob ) {
+        $meta = $blob->meta();
+
+        if ( ! empty( $meta['ID'] ) && get_post( (int) $meta['ID'] ) ) {
+            return (int) $meta['ID'];
+        }
+
+        $by_path = get_posts( array(
+            'post_type'      => 'any',
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_key'       => '_wghs_github_path',
+            'meta_value'     => $blob->path(),
+        ) );
+        if ( ! empty( $by_path ) ) {
+            return (int) array_pop( $by_path );
+        }
+
+        // Fall back to the filename slug (e.g. posts/my-slug.md -> my-slug).
+        $slug = pathinfo( $blob->path(), PATHINFO_FILENAME );
+        if ( $slug ) {
+            $by_slug = get_posts( array(
+                'name'           => $slug,
+                'post_type'      => 'any',
+                'post_status'    => 'any',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+            ) );
+            if ( ! empty( $by_slug ) ) {
+                return (int) array_pop( $by_slug );
+            }
+        }
+
+        return 0;
+    }
+
+    /**
      * Save an post to database
      * and associates their author as well as their latest
      *
