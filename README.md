@@ -29,9 +29,8 @@ Specified types:
 Caveats:
 
 - Posts cannot be deleted on the front-end by removing files from the repository (but see [Deleting a post](#deleting-a-post) for the explicit, opt-in mechanism)
-- Posts cannot be added to the front-end by adding new files with the appropriate metadata header to the repository (unlike the litefeel version)
 
-These limitations are in place to prevent front-end problems, whether due to a bad commit or due to the need for complex 
+A new file with an appropriate metadata header (and no `ID`, or an `ID` that does not match an existing post) is imported as a new post. Because adding and removing files can affect the live front-end, take care when committing: a bad commit can publish or alter content unexpectedly.
 
 ## Deleting a post
 
