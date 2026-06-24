@@ -416,6 +416,31 @@ class Wordpress_GitHub_Sync_Database {
                 update_post_meta( $post_id, 'attribute_' . $slug, $value );
             }
         }
+
+        // Recompute the derived `_price` meta. We write `_regular_price` (and
+        // `_sale_price`) above as raw post_meta, which bypasses the WC CRUD
+        // layer -- so WooCommerce never derives the active `_price` from them.
+        // The result is a product with a regular price set but an empty
+        // `_price`, which renders no price and no add-to-cart button on the
+        // front end (published/instock notwithstanding). Loading the product
+        // through wc_get_product() and saving it runs WC's price calculation
+        // and persists `_price`.
+        //
+        // Scope: simple products and variations only. Variable parents derive
+        // their price from variations and are reconciled separately in
+        // import.php::sync_variable_parents(); calling save() on a parent here
+        // would risk WC returning the stale `simple`-typed object cached before
+        // the product_type term was written (see that method's docblock).
+        if ( ( 'product' === $post_type && 'variable' !== ( isset( $meta['product_type'] ) ? $meta['product_type'] : '' ) )
+            || 'product_variation' === $post_type ) {
+            // Bust caches so wc_get_product() resolves a fresh object reflecting
+            // the product_type term and meta just written above.
+            clean_post_cache( $post_id );
+            $product = wc_get_product( $post_id );
+            if ( $product ) {
+                $product->save();
+            }
+        }
     }
 
     /**
