@@ -123,4 +123,30 @@ class Wordpress_GitHub_Sync_Fetch_Client extends Wordpress_GitHub_Sync_Base_Clie
 
         return new Wordpress_GitHub_Sync_Blob( $result );
     }
+
+    /**
+     * Returns the current blob sha of the file at a path on the remote branch.
+     *
+     * The GitHub Contents API requires the file's current blob sha to update
+     * or delete it; the sha cached in post meta drifts whenever the file is
+     * changed on GitHub directly. This fetches the live value.
+     *
+     * @param  string $path
+     * @return string|WP_Error Current blob sha, or WP_Error if the lookup failed.
+     */
+    public function remote_sha( $path ) {
+        $result = $this->call( 'GET', $this->content_endpoint( $path ) );
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+
+        if ( ! isset( $result->sha ) ) {
+            return new WP_Error(
+                'missing_sha',
+                sprintf( __( 'No sha returned for %s.', 'wordpress-github-sync' ), $path )
+            );
+        }
+
+        return $result->sha;
+    }
 }

@@ -240,6 +240,17 @@ class Wordpress_GitHub_Sync_Export {
 
         $github_path = get_post_meta( $post_id, '_wghs_github_path', true );
 
+        // A post that was never exported (e.g. a draft deleted before it was
+        // ever published) has no `_wghs_github_path`. Without this guard the
+        // empty path falls through to remote_sha()/delete_file(), and because
+        // content_endpoint() drops an empty segment, both target the repo's
+        // `/contents` root rather than a file -- a meaningless call that
+        // surfaces as a critical error on the synchronous delete_post request.
+        // There is nothing on GitHub to remove, so treat it as a no-op.
+        if ( empty( $github_path ) ) {
+            return __( 'Post was never exported to GitHub; nothing to delete.', 'wordpress-github-sync' );
+        }
+
         $message = apply_filters(
             'wghs_commit_msg_delete',
             sprintf(
